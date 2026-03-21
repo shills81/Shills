@@ -54,7 +54,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:28px 48px;display:fle
 .nav-mobile a:hover{opacity:1;color:var(--gold);}
 .nav-close{background:none;border:none;color:var(--smoke-white);font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.2em;opacity:.5;cursor:pointer;margin-top:24px;text-transform:uppercase;transition:opacity .3s;}
 .nav-close:hover{opacity:1;}
-@media(min-width:900px){.nav-links{display:flex;}.nav-hamburger{display:none;}}
 
 /* HERO — cosmic stays untouched, we layer smoke texture on top */
 #hero{position:relative;height:100vh;min-height:620px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;overflow:hidden;padding:0 0 80px 72px;}
@@ -680,7 +679,7 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
     <span class="notify-eyebrow reveal">Stay close</span>
     <h2 class="notify-title reveal">Be first.<br><em>When the doors open.</em></h2>
     <p class="notify-sub reveal">Collector access, preview drops, and Lisbon debut details — direct to you.</p>
-    <form class="notify-form reveal" name="notify" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/">
+    <form class="notify-form reveal" name="notify" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">
       <input type="hidden" name="form-name" value="notify">
       <p class="notify-honey" aria-hidden="true"><label>Do not fill: <input name="bot-field"></label></p>
       <div class="notify-row">
