@@ -72,12 +72,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:28px clamp(20px,4vw,4
 .collab-card:hover::before{opacity:1;}
 
 /* Image slot */
-.collab-img-wrap{position:relative;overflow:hidden;height:clamp(130px,15vw,180px);width:100%;}
-.collab-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:brightness(.82) grayscale(.15);transition:filter .5s,transform .7s;-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-select:none;pointer-events:auto;}
+.collab-img-wrap{position:relative;overflow:hidden;height:clamp(160px,18vw,220px);width:100%;background:var(--mist);}
+.collab-img-wrap img{width:100%;height:100%;object-fit:contain;object-position:center center;display:block;filter:brightness(.82) grayscale(.15);transition:filter .5s,transform .7s;-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-select:none;pointer-events:auto;}
 .collab-card:hover .collab-img-wrap img{filter:brightness(.96) grayscale(0);transform:scale(1.03);}
 
 /* Initials placeholder */
-.collab-initial{aspect-ratio:3/4;width:100%;background:rgba(232,228,222,.03);display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(201,168,76,.1);}
+.collab-initial{height:clamp(160px,18vw,220px);width:100%;background:rgba(232,228,222,.03);display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(201,168,76,.1);}
 .collab-initial span{font-family:'Syncopate',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--gold);opacity:.25;letter-spacing:.08em;}
 
 /* Card info */
@@ -256,7 +256,7 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-select:n
       <div class="collab-initial" aria-hidden="true"><span>?</span></div>
       <div class="collab-info">
         <span class="collab-discipline">Artist</span>
-        <h2 class="collab-name">TBD</h2>
+        <h2 class="collab-name">TBA</h2>
       </div>
     </article>
 
