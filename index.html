@@ -54,6 +54,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:28px 48px;display:fle
 .nav-mobile a:hover{opacity:1;color:var(--gold);}
 .nav-close{background:none;border:none;color:var(--smoke-white);font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.2em;opacity:.5;cursor:pointer;margin-top:24px;text-transform:uppercase;transition:opacity .3s;}
 .nav-close:hover{opacity:1;}
+@media(min-width:900px){.nav-links{display:flex;}.nav-hamburger{display:none;}}
 
 /* HERO — cosmic stays untouched, we layer smoke texture on top */
 #hero{position:relative;height:100vh;min-height:620px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;overflow:hidden;padding:0 0 80px 72px;}
@@ -306,6 +307,21 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
 .at-cta-arrow{font-size:.65rem;opacity:.6;transition:transform .3s,opacity .3s;}
 .at-cta:hover .at-cta-arrow{transform:translateX(4px);opacity:1;}
 @media(max-width:600px){.at-names{grid-template-columns:repeat(2,1fr);}}
+
+/* NOTIFY CTA */
+#notify{padding:clamp(56px,7vw,96px) clamp(20px,4vw,48px);text-align:center;position:relative;z-index:1;background:radial-gradient(ellipse at 50% 100%,rgba(201,168,76,.05) 0%,transparent 65%);}
+.notify-inner{max-width:min(580px,90vw);margin:0 auto;}
+.notify-eyebrow{font-family:'Space Mono',monospace;font-size:.88rem;letter-spacing:.38em;color:var(--gold);text-transform:uppercase;margin-bottom:20px;opacity:.9;display:block;}
+.notify-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.4rem);font-weight:300;font-style:italic;color:var(--smoke-white);line-height:1.2;margin-bottom:16px;}
+.notify-sub{font-family:'Space Mono',monospace;font-size:clamp(.6rem,.85vw,.75rem);letter-spacing:.2em;color:rgba(232,228,222,.45);text-transform:uppercase;line-height:1.85;margin-bottom:40px;display:block;}
+.notify-honey{display:none;}
+.notify-row{display:flex;gap:2px;max-width:480px;margin:0 auto;}
+.notify-input{flex:1;background:rgba(232,228,222,.04);border:1px solid rgba(232,228,222,.15);color:var(--smoke-white);font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.12em;padding:16px 20px;outline:none;transition:border-color .3s;min-width:0;}
+.notify-input::placeholder{color:rgba(232,228,222,.3);}
+.notify-input:focus{border-color:rgba(201,168,76,.4);}
+.notify-btn{background:transparent;border:1px solid rgba(201,168,76,.4);color:var(--gold);font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;padding:16px 28px;cursor:pointer;transition:border-color .3s,background .3s;white-space:nowrap;}
+.notify-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.06);}
+@media(max-width:500px){.notify-row{flex-direction:column;}}
 </style>
 </head>
 <body>
@@ -336,7 +352,8 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
 </nav>
 
 <main id="main-content">
-<!-- HERO: COSMIC — untouched, smoke layer on top -->
+
+<!-- HERO -->
 <section id="hero" class="wm" aria-label="VEXA Hero">
   <img class="hero-img" src="./images/hero-bg.webp" alt="VEXA Cosmic Portrait">
   <img class="hero-smoke-layer" src="./images/smoke-layer.webp" alt="" loading="lazy">
@@ -358,15 +375,57 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
   </div>
 </section>
 
-<!-- GRATITUDE -->
-<section id="gratitude" aria-label="A message from SHILLS">
-  <div class="gratitude-inner">
-    <span class="gratitude-from reveal">A note from SHILLS</span>
-    <span class="gratitude-text reveal">To everyone who has stopped to look, who has shared this work, felt something in it, or simply stayed for a moment longer than they needed to.</span>
-    <span class="gratitude-text reveal">You are not just a viewer. You are the reason this exists. The energy you give back: presence, kindness, connection. I carry that out into the world and give everything I can to others. You fuel that. More than you know.</span>
-    <span class="gratitude-text reveal">People you will never meet have been reached because you showed up here. That is not small. That is everything.</span>
-    <span class="gratitude-closing reveal">That is Energy.<br><em>And what do we say? Energy always finds its people.</em></span>
-    <span class="gratitude-sig reveal">Thank you.<br><em>— SHILLS</em></span>
+<!-- PORTRAIT REVEAL -->
+<section id="portrait-reveal" aria-label="The Work">
+  <div class="pr-text">
+    <div class="pr-eyebrow reveal">The Work</div>
+    <h2 class="pr-title reveal">Energy does not disappear.<br><em>It transforms.</em></h2>
+    <p class="pr-body reveal">VEXA is a volumetric smoke portrait series that gives form to what most art leaves invisible: the interior life of energy itself. Each piece is built from hand-made smoke compositions used to train AI and generate exquisite pieces, transformed through a rigorous visual process that preserves the character of the original material while revealing the emotional architecture beneath.</p>
+    <p class="pr-body reveal">Five thousand years of energy measurement data inform the series. The work is not symbolic. It is structural. VEXA speaks in the language that energy has always spoken, and asks the viewer to listen with their body before their mind.</p>
+    <div class="stats reveal">
+      <div><div class="stat-num">45</div><div class="stat-lbl">Digital Pieces</div></div>
+      <div><div class="stat-num">3</div><div class="stat-lbl">Cycles</div></div>
+      <div><div class="stat-num">5K</div><div class="stat-lbl">Years of Data</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO -->
+<section id="video-section" aria-label="VEXA Showcase Video">
+  <p class="video-label">VEXA — 2026</p>
+  <div class="video-wrap wm">
+    <video autoplay muted loop playsinline controls controlsList="nodownload" aria-label="VEXA 2026 Ethereal Cosmic animated showcase">
+      <source src="./images/vexa-animated.mp4" type="video/mp4">
+    </video>
+  </div>
+</section>
+
+<!-- BALANCE -->
+<section id="balance" class="wm" aria-label="The Question She Holds">
+  <img class="bal-img" src="./images/portrait.webp" alt="VEXA Balance — Humanity and AI" loading="lazy">
+  <div class="bal-overlay"></div>
+  <div class="bal-text">
+    <div class="bal-eyebrow reveal">The Question She Holds</div>
+    <h2 class="bal-title reveal">Humanity.<br>Artificial Intelligence.<br><em>Who tips the scale?</em></h2>
+    <p class="bal-sub reveal">VEXA does not answer. She measures.</p>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery" class="wm" aria-label="Gallery">
+  <div class="gallery-wide reveal">
+    <img src="./images/balance.webp" alt="VEXA Blue Eyes" loading="lazy">
+    <span class="gallery-wide-label">Blue Eyes Emerging</span>
+  </div>
+  <div class="gallery-duo">
+    <div class="gallery-duo-item reveal reveal-d1">
+      <img src="./images/gallery-wide.webp" alt="VEXA Layer One" loading="lazy">
+      <span class="gallery-duo-label">VEXA Layer I</span>
+    </div>
+    <div class="gallery-duo-item reveal reveal-d2">
+      <img src="./images/gallery-duo-1.webp" alt="VEXA Equations" loading="lazy">
+      <span class="gallery-duo-label">The Equations of Energy</span>
+    </div>
   </div>
 </section>
 
@@ -400,50 +459,6 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
       <span class="exp-q">Why Lisbon?</span>
       <h3 class="exp-title">The NFC Summit is where art and technology meet</h3>
       <p class="exp-body">The NFC Lisbon Summit brings together artists, collectors, and technologists at the frontier of digital culture. VEXA debuts here because it belongs at that intersection; this is not art about technology. It is art that technology made possible.</p>
-    </div>
-  </div>
-</section>
-
-<!-- PORTRAIT REVEAL -->
-<section id="portrait-reveal" aria-label="The Work">
-  <div class="pr-text">
-    <div class="pr-eyebrow reveal">The Work</div>
-    <h2 class="pr-title reveal">Energy does not disappear.<br><em>It transforms.</em></h2>
-    <p class="pr-body reveal">VEXA is a volumetric smoke portrait series that gives form to what most art leaves invisible: the interior life of energy itself. Each piece is built from hand-made smoke compositions used to train AI and generate exquisite pieces, transformed through a rigorous visual process that preserves the character of the original material while revealing the emotional architecture beneath.</p>
-    <p class="pr-body reveal">Five thousand years of energy measurement data inform the series. The work is not symbolic. It is structural. VEXA speaks in the language that energy has always spoken, and asks the viewer to listen with their body before their mind.</p>
-    <div class="stats reveal">
-      <div><div class="stat-num">45</div><div class="stat-lbl">Digital Pieces</div></div>
-      <div><div class="stat-num">3</div><div class="stat-lbl">Cycles</div></div>
-      <div><div class="stat-num">5K</div><div class="stat-lbl">Years of Data</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- BALANCE — VEXA weighing Humanity vs AI -->
-<section id="balance" class="wm" aria-label="The Question She Holds">
-  <img class="bal-img" src="./images/portrait.webp" alt="VEXA Balance — Humanity and AI" loading="lazy">
-  <div class="bal-overlay"></div>
-  <div class="bal-text">
-    <div class="bal-eyebrow reveal">The Question She Holds</div>
-    <h2 class="bal-title reveal">Humanity.<br>Artificial Intelligence.<br><em>Who tips the scale?</em></h2>
-    <p class="bal-sub reveal">VEXA does not answer. She measures.</p>
-  </div>
-</section>
-
-<!-- GALLERY -->
-<section id="gallery" class="wm" aria-label="Gallery">
-  <div class="gallery-wide reveal">
-    <img src="./images/balance.webp" alt="VEXA Blue Eyes" loading="lazy">
-    <span class="gallery-wide-label">Blue Eyes Emerging</span>
-  </div>
-  <div class="gallery-duo">
-    <div class="gallery-duo-item reveal reveal-d1">
-      <img src="./images/gallery-wide.webp" alt="VEXA Layer One" loading="lazy">
-      <span class="gallery-duo-label">VEXA Layer I</span>
-    </div>
-    <div class="gallery-duo-item reveal reveal-d2">
-      <img src="./images/gallery-duo-1.webp" alt="VEXA Equations" loading="lazy">
-      <span class="gallery-duo-label">The Equations of Energy</span>
     </div>
   </div>
 </section>
@@ -571,22 +586,6 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
         </div>
       </div>
       <div class="sw-item sw-invert reveal reveal-d1">
-        <img src="./images/weight-tbd-1.webp" alt="Untitled, VEXA series Cycle II" loading="lazy">
-        <div class="sw-info">
-          <span class="sw-num">VEXA &nbsp;&nbsp; Cycle II</span>
-          <span class="sw-title">TBD</span>
-          <span class="sw-cycle">Cycle II &nbsp;&nbsp; Weight</span>
-        </div>
-      </div>
-      <div class="sw-item sw-invert reveal reveal-d2">
-        <img src="./images/weight-tbd-2.webp" alt="Untitled, VEXA series Cycle II" loading="lazy">
-        <div class="sw-info">
-          <span class="sw-num">VEXA &nbsp;&nbsp; Cycle II</span>
-          <span class="sw-title">TBD</span>
-          <span class="sw-cycle">Cycle II &nbsp;&nbsp; Weight</span>
-        </div>
-      </div>
-      <div class="sw-item sw-invert reveal reveal-d3">
         <img src="./images/dragon.webp" alt="Dragon, VEXA series" loading="lazy">
         <div class="sw-info">
           <span class="sw-num">VEXA</span>
@@ -614,7 +613,7 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
   </div>
 </section>
 
-<!-- QUOTE over equations -->
+<!-- QUOTE -->
 <section id="quote" class="wm" aria-label="Artist Quote">
   <img class="q-img" src="./images/gallery-duo-2.webp" alt="" loading="lazy">
   <div class="q-overlay"></div>
@@ -622,6 +621,24 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
     <p class="q-text reveal">Energy always finds its people.<br>VEXA is where it begins to speak.</p>
     <p class="q-attr reveal">&mdash; SHILLS</p>
   </div>
+</section>
+
+<!-- THE COLLECTIVE -->
+<section id="artists-teaser" aria-label="The Collective">
+  <p class="at-eyebrow reveal">The Collective</p>
+  <h2 class="at-title reveal">The power of WE<br><em>over ME.</em></h2>
+  <p class="at-sub reveal">Not collaborators. Extensions.</p>
+  <div class="at-names reveal">
+    <a class="at-name" href="https://x.com/andresdelvecc" target="_blank" rel="noopener">Andres Del Vecchio</a>
+    <a class="at-name" href="https://x.com/bakuartiste" target="_blank" rel="noopener">Baku</a>
+    <a class="at-name" href="https://x.com/lampwrecked_" target="_blank" rel="noopener">Lamp</a>
+    <a class="at-name" href="https://x.com/mariafynsknorup" target="_blank" rel="noopener">Maria Fynsk Norup</a>
+    <a class="at-name" href="https://x.com/nuclearsamurai" target="_blank" rel="noopener">Nuclear Samurai</a>
+    <a class="at-name" href="https://x.com/OmarZRobles" target="_blank" rel="noopener">Omar ZRobles</a>
+    <a class="at-name" href="https://x.com/serc1n" target="_blank" rel="noopener">Serc</a>
+    <span class="at-name tbd">TBD</span>
+  </div>
+  <a class="at-cta reveal" href="collabs.html">Meet the collective <span class="at-cta-arrow" aria-hidden="true">&#8594;</span></a>
 </section>
 
 <!-- DEBUT -->
@@ -645,33 +662,35 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
   </div>
 </section>
 
-<!-- ARTISTS TEASER -->
-<section id="artists-teaser" aria-label="The Artists Behind VEXA">
-  <p class="at-eyebrow reveal">The Collective</p>
-  <h2 class="at-title reveal">The power of WE<br><em>over ME.</em></h2>
-  <p class="at-sub reveal">Not collaborators. Extensions. The power of WE over ME.</p>
-  <div class="at-names reveal">
-    <a class="at-name" href="https://x.com/andresdelvecc" target="_blank" rel="noopener">Adres Del Vecchio</a>
-    <a class="at-name" href="https://x.com/bakuartiste" target="_blank" rel="noopener">Baku</a>
-    <a class="at-name" href="https://x.com/lampwrecked_" target="_blank" rel="noopener">Lamp</a>
-    <a class="at-name" href="https://x.com/mariafynsknorup" target="_blank" rel="noopener">Maria Fynsk Norup</a>
-    <a class="at-name" href="https://x.com/nuclearsamurai" target="_blank" rel="noopener">Nuclear Samuri</a>
-    <a class="at-name" href="https://x.com/OmarZRobles" target="_blank" rel="noopener">Omar ZRobles</a>
-    <a class="at-name" href="https://x.com/serc1n" target="_blank" rel="noopener">Serc</a>
-    <span class="at-name tbd">TBD</span>
+<!-- GRATITUDE -->
+<section id="gratitude" aria-label="A message from SHILLS">
+  <div class="gratitude-inner">
+    <span class="gratitude-from reveal">A note from SHILLS</span>
+    <span class="gratitude-text reveal">To everyone who has stopped to look, who has shared this work, felt something in it, or simply stayed for a moment longer than they needed to.</span>
+    <span class="gratitude-text reveal">You are not just a viewer. You are the reason this exists. The energy you give back: presence, kindness, connection. I carry that out into the world and give everything I can to others. You fuel that. More than you know.</span>
+    <span class="gratitude-text reveal">People you will never meet have been reached because you showed up here. That is not small. That is everything.</span>
+    <span class="gratitude-closing reveal">That is Energy.<br><em>And what do we say? Energy always finds its people.</em></span>
+    <span class="gratitude-sig reveal">Thank you.<br><em>— SHILLS</em></span>
   </div>
-  <a class="at-cta reveal" href="collabs.html">Meet the artists <span class="at-cta-arrow" aria-hidden="true">&#8594;</span></a>
 </section>
 
-<!-- VIDEO -->
-<section id="video-section" aria-label="VEXA Showcase Video">
-  <p class="video-label">VEXA — 2026</p>
-  <div class="video-wrap wm">
-    <video autoplay muted loop playsinline controls controlsList="nodownload" aria-label="VEXA 2026 Ethereal Cosmic animated showcase">
-      <source src="./images/vexa-animated.mp4" type="video/mp4">
-    </video>
+<!-- NOTIFY -->
+<section id="notify" aria-label="Stay close to VEXA">
+  <div class="notify-inner">
+    <span class="notify-eyebrow reveal">Stay close</span>
+    <h2 class="notify-title reveal">Be first.<br><em>When the doors open.</em></h2>
+    <p class="notify-sub reveal">Collector access, preview drops, and Lisbon debut details — direct to you.</p>
+    <form class="notify-form reveal" name="notify" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/">
+      <input type="hidden" name="form-name" value="notify">
+      <p class="notify-honey" aria-hidden="true"><label>Do not fill: <input name="bot-field"></label></p>
+      <div class="notify-row">
+        <input class="notify-input" type="email" name="email" placeholder="Your email" required autocomplete="email">
+        <button class="notify-btn" type="submit">Notify me</button>
+      </div>
+    </form>
   </div>
 </section>
+
 </main>
 
 
