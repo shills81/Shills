@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEXA — The Complete Language of Energy</title>
+<meta name="description" content="VEXA is a 45-piece volumetric smoke portrait series exploring Grieving, Weight, and Liberation. World debut at NFC Lisbon Summit, June 2026.">
+<meta name="theme-color" content="#050507">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.vexa45.com/">
+<meta property="og:title" content="VEXA — The Complete Language of Energy">
+<meta property="og:description" content="45 digital pieces. Handmade smoke compositions transformed through AI. World debut at NFC Lisbon Summit, June 2026.">
+<meta property="og:image" content="https://www.vexa45.com/images/hero-bg.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<!-- Twitter / X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@shills">
+<meta name="twitter:title" content="VEXA — The Complete Language of Energy">
+<meta name="twitter:description" content="45 digital pieces. Handmade smoke compositions transformed through AI. World debut at NFC Lisbon Summit, June 2026.">
+<meta name="twitter:image" content="https://www.vexa45.com/images/hero-bg.webp">
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23050507'/><text x='50%25' y='56%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='22' fill='%23c9a84c'>V</text></svg>">
+<!-- Preload hero -->
+<link rel="preload" as="image" href="./images/hero-bg.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Syncopate:wght@400;700&family=Space+Mono:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --black:#050507;--smoke-white:#e8e4de;--ember:#ff6b35;
+  --vapor:#b0c4de;--gold:#c9a84c;--mist:rgba(232,228,222,0.05);
+  --fd:'Syncopate',sans-serif;--fb:'Cormorant Garamond',serif;--fm:'Space Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--smoke-white);font-family:'Cormorant Garamond',serif;overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;width:8px;height:8px;background:var(--ember);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;}
+.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(201,168,76,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:100;opacity:.3;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:28px 48px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(5,5,7,0.92) 0%,transparent 100%);}
+.nav-logo{font-family:'Syncopate',sans-serif;font-size:.85rem;letter-spacing:.3em;color:var(--smoke-white);text-decoration:none;opacity:.85;}
+.nav-links{display:none;gap:40px;list-style:none;}
+.nav-links a{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.18em;color:var(--smoke-white);text-decoration:none;opacity:.75;text-transform:uppercase;transition:opacity .3s,color .3s;}
+.nav-links a:hover{opacity:1;color:var(--gold);}
+.nav-hamburger{display:flex;flex-direction:column;gap:6px;background:rgba(5,5,7,.7);border:1px solid rgba(201,168,76,.35);border-radius:6px;cursor:pointer;padding:10px 12px;z-index:51;transition:border-color .3s,background .3s,box-shadow .3s;box-shadow:0 0 14px rgba(201,168,76,.15),0 2px 8px rgba(5,5,7,.6);}
+.nav-hamburger:hover{border-color:var(--gold);background:rgba(201,168,76,.08);box-shadow:0 0 22px rgba(201,168,76,.3),0 2px 8px rgba(5,5,7,.6);}
+.nav-hamburger span{width:26px;height:2px;background:var(--smoke-white);display:block;transition:transform .3s,opacity .3s;}
+.nav-mobile{display:none;position:fixed;inset:0;background:rgba(5,5,7,.97);z-index:49;flex-direction:column;align-items:center;justify-content:center;gap:48px;}
+.nav-mobile.open{display:flex;}
+.nav-mobile a{font-family:'Space Mono',monospace;font-size:.85rem;letter-spacing:.22em;color:var(--smoke-white);text-decoration:none;text-transform:uppercase;opacity:.75;transition:opacity .3s,color .3s;}
+.nav-mobile a:hover{opacity:1;color:var(--gold);}
+.nav-close{background:none;border:none;color:var(--smoke-white);font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.2em;opacity:.5;cursor:pointer;margin-top:24px;text-transform:uppercase;transition:opacity .3s;}
+.nav-close:hover{opacity:1;}
+
+/* HERO — cosmic stays untouched, we layer smoke texture on top */
+#hero{position:relative;height:100vh;min-height:620px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;overflow:hidden;padding:0 0 80px 72px;}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 20%;z-index:0;}
+.hero-smoke-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;opacity:.18;mix-blend-mode:screen;}
+.hero-overlay{position:absolute;inset:0;z-index:2;background:linear-gradient(to right,rgba(5,5,7,0.82) 0%,rgba(5,5,7,0.18) 60%,transparent 100%),linear-gradient(to top,rgba(5,5,7,0.95) 0%,rgba(5,5,7,0.3) 30%,transparent 60%);}
+.hero-content{position:relative;z-index:3;max-width:min(900px,55vw);}
+.hero-eyebrow{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:24px;opacity:0;animation:fadeUp 1.2s ease .3s forwards;text-shadow:0 1px 12px rgba(5,5,7,.9),0 0 24px rgba(5,5,7,.7);}
+.hero-title{font-family:'Syncopate',sans-serif;font-size:clamp(5rem,16vw,14rem);font-weight:700;letter-spacing:.06em;line-height:.85;color:transparent;-webkit-text-stroke:1px var(--smoke-white);opacity:0;animation:fadeUp 1.4s ease .5s forwards;}
+.hero-title .lit{color:var(--smoke-white);-webkit-text-stroke:0px;text-shadow:0 0 32px rgba(201,168,76,.35),0 0 72px rgba(255,107,53,.12);}
+.hero-subtitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1rem,2vw,1.5rem);font-weight:300;color:var(--vapor);margin-top:24px;letter-spacing:.08em;opacity:0;animation:fadeUp 1.4s ease .8s forwards;}
+.hero-tagline{font-family:'Cormorant Garamond',serif;font-size:clamp(1.1rem,2.2vw,1.7rem);font-weight:300;color:var(--smoke-white);margin-top:28px;letter-spacing:.04em;opacity:0;animation:fadeUp 1.4s ease 1s forwards;}
+.hero-tagline em{font-style:italic;color:var(--gold);}
+.hero-cycles{display:flex;gap:24px;align-items:center;margin-top:36px;opacity:0;animation:fadeUp 1.2s ease 1.3s forwards;}
+.hero-cycles span{font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:.25em;opacity:.7;}
+.hero-cycles .div{opacity:.35;font-size:.5rem;}
+.scroll-cue{position:absolute;bottom:48px;right:64px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;animation:fadeIn 1s ease 2s forwards;}
+.scroll-cue span{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.25em;opacity:.5;text-transform:uppercase;writing-mode:vertical-rl;}
+.scroll-line{width:1px;height:60px;background:linear-gradient(to bottom,rgba(201,168,76,.6),transparent);animation:scrollPulse 2s ease-in-out infinite;}
+
+/* WATERMARK */
+.wm{position:relative;}
+.wm::after{content:'';position:absolute;inset:0;z-index:9;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='100'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' font-family='monospace' font-size='11' font-weight='700' fill='%23c9a84c' opacity='0.06' transform='rotate(-30 110 50)'%3EVEXA %C2%A9 SHILLS%3C/text%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:220px 100px;}
+
+/* VIDEO SECTION */
+#video-section{position:relative;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 48px 0;overflow:hidden;}
+#video-section::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,var(--black) 0%,transparent 10%,transparent 90%,var(--black) 100%);z-index:1;pointer-events:none;}
+.video-wrap{position:relative;width:100%;max-width:min(1600px,96vw);aspect-ratio:16/9;z-index:2;}
+.video-wrap video{width:100%;height:100%;object-fit:cover;display:block;}
+.video-label{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.28em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;opacity:.85;z-index:2;}
+@media(max-width:900px){#video-section{padding:16px 24px 0;}}
+@media(max-width:480px){#video-section{padding:12px 16px 0;}}
+
+/* PORTRAIT REVEAL */
+#portrait-reveal{position:relative;overflow:hidden;}
+.pr-text{display:flex;flex-direction:column;justify-content:center;padding:clamp(24px,3.5vw,48px) clamp(24px,6vw,80px);background:var(--black);position:relative;max-width:min(1100px,88vw);margin:0 auto;}
+.pr-text::before{content:'';position:absolute;left:0;top:15%;bottom:15%;width:1px;background:linear-gradient(to bottom,transparent,rgba(201,168,76,.25),transparent);}
+.pr-eyebrow{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:28px;}
+.pr-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,3.5vw,3.4rem);font-weight:300;line-height:1.2;margin-bottom:32px;color:var(--smoke-white);}
+.pr-title em{font-style:italic;color:var(--vapor);}
+.pr-body{font-size:clamp(1.05rem,1.4vw,1.2rem);font-weight:300;line-height:1.9;color:rgba(232,228,222,.8);margin-bottom:20px;}
+.stats{display:flex;gap:40px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(232,228,222,.07);}
+.stat-num{font-family:'Syncopate',sans-serif;font-size:1.8rem;font-weight:700;color:var(--smoke-white);}
+.stat-lbl{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.2em;color:rgba(232,228,222,.55);text-transform:uppercase;margin-top:4px;}
+
+/* BALANCE FULL BLEED */
+#balance{position:relative;height:clamp(480px,72vh,1100px);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.bal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:0;filter:brightness(.75);}
+.bal-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at center,rgba(5,5,7,.55) 0%,rgba(5,5,7,.2) 50%,rgba(5,5,7,.75) 100%),linear-gradient(to bottom,rgba(5,5,7,.5) 0%,transparent 30%,transparent 70%,rgba(5,5,7,.8) 100%);}
+.bal-text{position:relative;z-index:2;text-align:center;max-width:min(800px,88vw);padding:0 clamp(16px,3vw,48px);}
+.bal-eyebrow{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:24px;text-shadow:0 1px 12px rgba(5,5,7,.9),0 0 24px rgba(5,5,7,.7);}
+.bal-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,4vw,4rem);font-weight:300;font-style:italic;color:var(--smoke-white);line-height:1.3;margin-bottom:20px;text-shadow:0 2px 20px rgba(5,5,7,.95),0 0 40px rgba(5,5,7,.8);}
+.bal-sub{font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:.2em;color:rgba(232,228,222,.75);text-transform:uppercase;text-shadow:0 1px 12px rgba(5,5,7,.95),0 0 24px rgba(5,5,7,.8);}
+
+/* CYCLES */
+#cycles{position:relative;z-index:1;padding:clamp(36px,5vw,72px) clamp(20px,4vw,48px);background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.04) 0%,transparent 70%);}
+.cycles-hd{text-align:center;margin-bottom:36px;}
+.cycles-hd .ey{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
+.cycles-hd h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,3.2rem);font-weight:300;font-style:italic;color:var(--smoke-white);}
+.cycles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;max-width:min(1400px,90vw);margin:0 auto;}
+.cycle-card{background:var(--mist);border:1px solid rgba(232,228,222,.06);padding:clamp(16px,2vw,24px) clamp(16px,2.2vw,28px);position:relative;overflow:hidden;transition:border-color .4s,background .4s;}
+.cycle-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:0;transition:opacity .4s;}
+.cycle-card:hover{background:rgba(201,168,76,.04);border-color:rgba(201,168,76,.2);}
+.cycle-card:hover::before{opacity:1;}
+.c-roman{font-family:'Syncopate',sans-serif;font-size:.78rem;letter-spacing:.35em;color:var(--gold);opacity:.8;margin-bottom:16px;display:block;}
+.c-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,2.2vw,2rem);font-weight:300;font-style:italic;color:var(--smoke-white);margin-bottom:12px;line-height:1;}
+.c-desc{font-family:'Cormorant Garamond',serif;font-size:clamp(.95rem,1.2vw,1.05rem);line-height:1.75;color:rgba(232,228,222,.75);font-weight:300;}
+.c-count{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.25em;color:rgba(232,228,222,.62);margin-top:20px;display:block;text-transform:uppercase;}
+
+/* GALLERY STRIP — blue eyes wide + layer1 + equations */
+#gallery{position:relative;overflow:hidden;background:var(--black);padding:0;}
+.gallery-wide{position:relative;overflow:hidden;}
+.gallery-wide img{width:100%;height:clamp(300px,28vw,600px);object-fit:cover;object-position:center 30%;display:block;filter:brightness(.85);}
+.gallery-wide::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,5,7,.5) 0%,transparent 30%,transparent 70%,rgba(5,5,7,.8) 100%),linear-gradient(to right,rgba(5,5,7,.3) 0%,transparent 20%,transparent 80%,rgba(5,5,7,.3) 100%);}
+.gallery-wide-label{position:absolute;bottom:40px;left:56px;z-index:2;font-family:'Space Mono',monospace;font-size:.88rem;letter-spacing:.28em;color:var(--gold);opacity:.9;text-transform:uppercase;text-shadow:0 1px 12px rgba(5,5,7,.9),0 0 24px rgba(5,5,7,.7);}
+.gallery-duo{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:2px;}
+.gallery-duo-item{position:relative;overflow:hidden;}
+.gallery-duo-item img{width:100%;height:clamp(240px,22vw,480px);object-fit:cover;display:block;filter:brightness(.8);transition:filter .5s,transform .6s;}
+.gallery-duo-item:hover img{filter:brightness(1);transform:scale(1.03);}
+.gallery-duo-item::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(5,5,7,.8) 100%);}
+.gallery-duo-label{position:absolute;bottom:28px;left:32px;z-index:2;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.25em;color:rgba(232,228,222,.75);text-transform:uppercase;}
+
+/* QUOTE over equations */
+#quote{position:relative;min-height:clamp(380px,55vh,800px);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.q-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;filter:brightness(.4) saturate(.8);}
+.q-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom,rgba(5,5,7,.7) 0%,rgba(5,5,7,.25) 50%,rgba(5,5,7,.8) 100%);}
+.q-content{position:relative;z-index:2;text-align:center;max-width:min(1100px,88vw);padding:clamp(28px,4vw,48px) clamp(20px,3.5vw,48px);}
+.q-mark{font-family:'Cormorant Garamond',serif;font-size:7.2rem;color:var(--gold);opacity:.2;line-height:0;position:relative;top:44px;}
+.q-text{font-family:'Cormorant Garamond',serif;font-size:clamp(1.4rem,2.8vw,2.5rem);font-style:italic;font-weight:300;line-height:1.55;color:var(--smoke-white);letter-spacing:.02em;}
+.q-attr{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.3em;color:var(--gold);margin-top:40px;opacity:.9;text-transform:uppercase;text-shadow:0 1px 12px rgba(5,5,7,.9),0 0 24px rgba(5,5,7,.7);}
+
+/* DEBUT */
+#debut{position:relative;z-index:1;padding:clamp(48px,6vw,80px) clamp(20px,4vw,48px) clamp(12px,2vw,20px);text-align:center;overflow:hidden;}
+#debut::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,107,53,.06) 0%,transparent 70%);pointer-events:none;}
+.d-eye{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.35em;color:var(--ember);text-transform:uppercase;margin-bottom:28px;}
+.d-title{font-family:'Syncopate',sans-serif;font-size:clamp(1.6rem,4.5vw,3.8rem);font-weight:400;letter-spacing:.1em;color:var(--smoke-white);margin-bottom:16px;}
+.d-title a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:2px;transition:border-color .3s;}
+.d-title a:hover{border-bottom-color:var(--gold);}
+.d-loc{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.3rem,2.2vw,2rem);color:var(--vapor);margin-bottom:32px;font-weight:300;}
+.d-details{display:inline-flex;flex-wrap:wrap;justify-content:center;align-items:stretch;margin-bottom:40px;border:1px solid rgba(232,228,222,.08);}
+.d-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:clamp(14px,2vw,28px) clamp(16px,2.8vw,40px);border-right:1px solid rgba(232,228,222,.08);text-align:center;min-width:clamp(80px,10vw,140px);}
+.d-item:last-child{border-right:none;}
+.d-val{font-family:'Syncopate',sans-serif;font-size:clamp(.9rem,1.2vw,1.2rem);font-weight:700;letter-spacing:.1em;color:var(--smoke-white);display:block;}
+.d-lbl{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.25em;color:rgba(232,228,222,.7);text-transform:uppercase;}
+
+/* COUNTDOWN */
+.countdown{display:flex;flex-wrap:wrap;gap:0;justify-content:center;margin-bottom:36px;}
+.cd-unit{text-align:center;padding:clamp(14px,2vw,24px) clamp(16px,2.5vw,36px);border:1px solid rgba(201,168,76,.18);border-right:none;background:rgba(201,168,76,.03);}
+.cd-unit:last-child{border-right:1px solid rgba(201,168,76,.18);}
+.cd-num{font-family:'Syncopate',sans-serif;font-size:clamp(2rem,5vw,3.6rem);font-weight:700;color:var(--gold);display:block;line-height:1;letter-spacing:.05em;min-width:3ch;text-align:center;}
+.cd-lbl{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.3em;color:rgba(201,168,76,.6);text-transform:uppercase;display:block;margin-top:10px;}
+.cd-note{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.2em;color:var(--ember);text-transform:uppercase;margin-bottom:36px;}
+
+
+/* FOOTER */
+footer{position:relative;z-index:1;padding:clamp(24px,3vw,36px) clamp(20px,4vw,48px);border-top:1px solid rgba(232,228,222,.06);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px;}
+.f-brand{font-family:'Syncopate',sans-serif;font-size:.75rem;letter-spacing:.3em;color:var(--smoke-white);opacity:.6;}
+.f-credit{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.15em;color:rgba(232,228,222,.6);text-align:center;line-height:1.9;}
+.f-credit a{color:var(--gold);text-decoration:none;opacity:.85;transition:opacity .3s;}
+.f-credit a:hover{opacity:1;}
+.f-social{display:flex;gap:28px;}
+.f-social a{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.2em;color:rgba(232,228,222,.7);text-decoration:none;text-transform:uppercase;transition:color .3s;}
+.f-social a:hover{color:var(--gold);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scrollPulse{0%,100%{opacity:.3}50%{opacity:.8}}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:.12s;}
+.reveal-d2{transition-delay:.24s;}
+.reveal-d3{transition-delay:.36s;}
+img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-select:none;pointer-events:auto;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}.hero-eyebrow,.hero-title,.hero-subtitle,.hero-tagline,.hero-cycles{opacity:1;transform:none;}.reveal{opacity:1;transform:none;}}
+
+@media(max-width:900px){
+  .pr-text::before{display:none;}
+  .gallery-duo{grid-template-columns:1fr;}
+  nav{padding:20px 24px;}
+  #hero{padding:0 0 56px 24px;height:100vh;min-height:560px;}
+  #balance{height:clamp(400px,58vh,800px);}
+  #gallery{padding:0;}
+  .gallery-wide-label{left:24px;bottom:20px;font-size:.72rem;}
+  .cycles-grid{grid-template-columns:1fr;gap:2px;}
+  .stats{flex-wrap:wrap;gap:28px;}
+  footer{justify-content:center;text-align:center;}
+  footer .f-social{justify-content:center;}
+}
+@media(max-width:600px){
+  #hero{padding:0 0 48px 16px;}
+  .gallery-wide img{height:clamp(200px,52vw,280px);}
+  .gallery-duo-item img{height:clamp(180px,44vw,240px);}
+  .exp-grid{grid-template-columns:1fr;}
+  .sw-grid{grid-template-columns:1fr;}
+  .sw-item{height:clamp(260px,60vw,360px);}
+  .d-details{width:100%;}
+  .d-item{border-right:none;border-bottom:1px solid rgba(232,228,222,.08);}
+  .d-item:last-child{border-bottom:none;}
+}
+@media(min-width:1600px){
+  #hero{height:100vh;min-height:700px;}
+  #balance{height:clamp(700px,75vh,1200px);}
+  .pr-text{max-width:min(1300px,82vw);padding:60px 120px 72px;}
+  .gallery-wide img{height:clamp(480px,32vw,700px);}
+  .gallery-duo-item img{height:clamp(380px,26vw,560px);}
+  #quote{min-height:clamp(600px,65vh,1000px);}
+  .video-wrap{max-width:min(1700px,96vw);}
+  .d-item{padding:36px 72px;}
+  #debut{padding:100px 64px 24px;}
+  .exp-grid{grid-template-columns:repeat(4,1fr);}
+  .sw-grid{grid-template-columns:repeat(3,1fr);}
+}
+
+/* GRATITUDE */
+#gratitude{padding:clamp(56px,7vw,88px) clamp(20px,4vw,48px);background:var(--black);border-top:1px solid rgba(201,168,76,.1);border-bottom:1px solid rgba(201,168,76,.08);}
+.gratitude-inner{max-width:min(960px,88vw);margin:0 auto;text-align:center;}
+.gratitude-from{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:48px;display:block;opacity:.9;}
+.gratitude-text{font-family:'Cormorant Garamond',serif;font-size:clamp(1.15rem,1.8vw,1.45rem);line-height:1.95;font-weight:300;color:rgba(232,228,222,.82);margin-bottom:32px;display:block;}
+.gratitude-closing{font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,2vw,1.55rem);font-weight:300;color:var(--smoke-white);margin-top:40px;margin-bottom:0;display:block;line-height:1.8;letter-spacing:.01em;}
+.gratitude-closing em{font-style:italic;color:var(--gold);}
+.gratitude-sig{font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,2vw,1.6rem);font-weight:300;color:var(--smoke-white);margin-top:44px;display:block;letter-spacing:.02em;}
+.gratitude-sig em{font-style:italic;color:var(--gold);}
+@media(max-width:900px){#gratitude{padding:64px 28px 56px;}}
+
+/* EXPLAINER */
+#explainer{padding:clamp(40px,5vw,64px) clamp(20px,4vw,48px);background:var(--black);border-top:1px solid rgba(232,228,222,.05);}
+.exp-hd{text-align:center;margin-bottom:clamp(32px,4vw,56px);}
+.exp-hd .ey{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;display:block;}
+.exp-hd h2{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;font-style:italic;color:var(--smoke-white);}
+.exp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;max-width:min(1500px,92vw);margin:0 auto;}
+.exp-card{background:rgba(232,228,222,.02);border:1px solid rgba(232,228,222,.06);padding:clamp(16px,2vw,28px) clamp(14px,1.8vw,24px);transition:background .4s,border-color .4s;}
+.exp-card:hover{background:rgba(201,168,76,.03);border-color:rgba(201,168,76,.18);}
+.exp-num{font-family:'Syncopate',sans-serif;font-size:2rem;font-weight:700;color:var(--gold);opacity:.13;line-height:1;margin-bottom:14px;display:block;}
+.exp-q{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.22em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;display:block;}
+.exp-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.1rem,1.4vw,1.35rem);font-weight:300;font-style:italic;color:var(--smoke-white);margin-bottom:12px;line-height:1.3;}
+.exp-body{font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.85;color:rgba(232,228,222,.7);font-weight:300;}
+
+/* SELECTED WORKS */
+#selected-works{padding:clamp(48px,6vw,80px) clamp(20px,4vw,48px) clamp(36px,5vw,64px);background:var(--black);}
+.sw-hd{text-align:center;margin-bottom:clamp(32px,4vw,56px);}
+.sw-hd .ey{font-family:'Space Mono',monospace;font-size:.92rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;display:block;}
+.sw-hd h2{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;font-style:italic;color:var(--smoke-white);}
+.sw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;max-width:min(1600px,96vw);margin:0 auto;}
+.sw-item{position:relative;overflow:hidden;height:clamp(260px,28vw,560px);}
+.sw-item img{width:100%;height:100%;object-fit:cover;object-position:center center;display:block;transition:transform .9s ease,filter .5s;filter:brightness(.78);}
+.sw-item:hover img,.sw-item:focus-within img{transform:scale(1.04);filter:brightness(.96);}
+.sw-info{position:absolute;bottom:0;left:0;right:0;padding:clamp(24px,3.5vw,48px) clamp(14px,1.8vw,24px) clamp(14px,1.8vw,22px);background:linear-gradient(to top,rgba(5,5,7,.96) 0%,rgba(5,5,7,.5) 55%,transparent 100%);transform:translateY(6px);transition:transform .45s;}
+.sw-item:hover .sw-info,.sw-item:focus-within .sw-info{transform:translateY(0);}
+.sw-num{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.25em;color:var(--gold);opacity:.85;text-transform:uppercase;margin-bottom:6px;display:block;}
+.sw-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;font-style:italic;color:var(--smoke-white);display:block;margin-bottom:5px;}
+.sw-cycle{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.2em;color:rgba(232,228,222,.5);text-transform:uppercase;}
+.sw-chapter{margin-bottom:56px;}
+.sw-chapter-label{display:flex;align-items:center;gap:24px;padding-bottom:20px;border-bottom:1px solid rgba(201,168,76,.12);margin-bottom:20px;max-width:min(1600px,96vw);margin-left:auto;margin-right:auto;}
+.sw-chapter-num{font-family:'Syncopate',sans-serif;font-size:2.2rem;font-weight:700;color:var(--gold);opacity:.3;line-height:1;flex-shrink:0;}
+.sw-chapter-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;font-style:italic;color:var(--smoke-white);display:block;margin-bottom:4px;}
+.sw-chapter-sub{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.18em;color:rgba(232,228,222,.4);text-transform:uppercase;display:block;}
+.sw-invert img{filter:invert(1) brightness(.88);}
+
+@media(max-width:1100px){
+  .exp-grid{grid-template-columns:repeat(2,1fr);}
+  .sw-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:900px){
+  #explainer{padding:48px 24px;}
+  #selected-works{padding:56px 24px 48px;}
+  .sw-item{height:clamp(220px,40vw,340px);}
+}
+@media(max-width:600px){
+  .exp-grid{grid-template-columns:1fr;}
+  .sw-grid{grid-template-columns:1fr;}
+  .sw-item{height:clamp(240px,60vw,360px);}
+}
+
+/* ARTISTS TEASER */
+#artists-teaser{position:relative;z-index:1;padding:clamp(56px,7vw,96px) clamp(20px,4vw,48px);text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.05) 0%,transparent 65%);}
+#artists-teaser::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:1px;height:clamp(40px,5vw,72px);background:linear-gradient(to bottom,transparent,rgba(201,168,76,.3),transparent);pointer-events:none;}
+.at-eyebrow{font-family:'Space Mono',monospace;font-size:.88rem;letter-spacing:.38em;color:var(--gold);text-transform:uppercase;margin-bottom:28px;opacity:.9;}
+.at-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,4vw,3.8rem);font-weight:300;font-style:italic;color:var(--smoke-white);line-height:1.2;margin-bottom:16px;}
+.at-sub{font-family:'Space Mono',monospace;font-size:clamp(.6rem,.85vw,.78rem);letter-spacing:.22em;color:rgba(232,228,222,.45);text-transform:uppercase;max-width:500px;margin:0 auto 44px;line-height:1.85;}
+.at-names{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid rgba(232,228,222,.06);max-width:min(800px,92vw);margin:0 auto 52px;}
+.at-name{font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,1.4vw,1.25rem);font-weight:300;color:rgba(232,228,222,.7);padding:clamp(12px,1.5vw,18px) clamp(18px,2.5vw,36px);border-right:1px solid rgba(232,228,222,.06);border-bottom:1px solid rgba(232,228,222,.06);transition:color .3s;text-decoration:none;display:block;}
+.at-name:hover{color:var(--gold);}
+.at-name.tbd{color:rgba(232,228,222,.2);font-style:italic;}
+.at-cta{display:inline-flex;align-items:center;gap:16px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--smoke-white);text-decoration:none;border:1px solid rgba(201,168,76,.3);padding:clamp(14px,1.8vw,20px) clamp(28px,3.5vw,48px);transition:border-color .3s,color .3s,background .3s;}
+.at-cta:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.04);}
+.at-cta-arrow{font-size:.65rem;opacity:.6;transition:transform .3s,opacity .3s;}
+.at-cta:hover .at-cta-arrow{transform:translateX(4px);opacity:1;}
+@media(max-width:600px){.at-names{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<a href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:var(--black);color:var(--gold);padding:8px 16px;font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:.1em" onfocus="this.style.left='16px';this.style.top='16px';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.top='auto';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+
+<nav aria-label="Main navigation">
+  <a class="nav-logo" href="#">VEXA</a>
+  <ul class="nav-links">
+    <li><a href="#portrait-reveal">The Work</a></li>
+    <li><a href="#selected-works">Gallery</a></li>
+    <li><a href="#cycles">The Cycles</a></li>
+    <li><a href="#debut">The Debut</a></li>
+    <li><a href="collabs.html">Artists</a></li>
+  </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Open navigation menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<nav class="nav-mobile" id="nav-mobile" aria-label="Mobile navigation" aria-hidden="true">
+  <a href="#portrait-reveal" onclick="closeMobileNav()">The Work</a>
+  <a href="#selected-works" onclick="closeMobileNav()">Gallery</a>
+  <a href="#cycles" onclick="closeMobileNav()">The Cycles</a>
+  <a href="#debut" onclick="closeMobileNav()">The Debut</a>
+  <a href="collabs.html">Artists</a>
+  <button class="nav-close" onclick="closeMobileNav()">Close</button>
+</nav>
+
+<main id="main-content">
+<!-- HERO: COSMIC — untouched, smoke layer on top -->
+<section id="hero" class="wm" aria-label="VEXA Hero">
+  <img class="hero-img" src="./images/hero-bg.webp" alt="VEXA Cosmic Portrait">
+  <img class="hero-smoke-layer" src="./images/smoke-layer.webp" alt="" loading="lazy">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">A 45-piece volumetric portrait series</div>
+    <h1 class="hero-title">V<span class="lit">E</span>XA</h1>
+    <p class="hero-subtitle">The Complete Language of Energy</p>
+    <p class="hero-tagline">Energy does not disappear. <em>It transforms.</em></p>
+    <div class="hero-cycles">
+      <span>Grieving</span><span class="div" aria-hidden="true">&#9670;</span>
+      <span>Weight</span><span class="div" aria-hidden="true">&#9670;</span>
+      <span>Liberation</span>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true">
+    <div class="scroll-line"></div>
+    <span>Descend</span>
+  </div>
+</section>
+
+<!-- GRATITUDE -->
+<section id="gratitude" aria-label="A message from SHILLS">
+  <div class="gratitude-inner">
+    <span class="gratitude-from reveal">A note from SHILLS</span>
+    <span class="gratitude-text reveal">To everyone who has stopped to look, who has shared this work, felt something in it, or simply stayed for a moment longer than they needed to.</span>
+    <span class="gratitude-text reveal">You are not just a viewer. You are the reason this exists. The energy you give back: presence, kindness, connection. I carry that out into the world and give everything I can to others. You fuel that. More than you know.</span>
+    <span class="gratitude-text reveal">People you will never meet have been reached because you showed up here. That is not small. That is everything.</span>
+    <span class="gratitude-closing reveal">That is Energy.<br><em>And what do we say? Energy always finds its people.</em></span>
+    <span class="gratitude-sig reveal">Thank you.<br><em>— SHILLS</em></span>
+  </div>
+</section>
+
+<!-- EXPLAINER -->
+<section id="explainer" aria-label="Understanding VEXA">
+  <div class="exp-hd">
+    <span class="ey reveal">New to this?</span>
+    <h2 class="reveal">Everything you need to know,<br><em>before you look.</em></h2>
+  </div>
+  <div class="exp-grid">
+    <div class="exp-card reveal reveal-d1">
+      <span class="exp-num">01</span>
+      <span class="exp-q">What is digital art?</span>
+      <h3 class="exp-title">Art made with software instead of a paintbrush</h3>
+      <p class="exp-body">Digital art uses computers, cameras, and software as the creative tool. The result can be displayed on screens, printed at any scale, or exist as a unique file. It is as real as any canvas; the medium is simply different.</p>
+    </div>
+    <div class="exp-card reveal reveal-d2">
+      <span class="exp-num">02</span>
+      <span class="exp-q">What is AI doing here?</span>
+      <h3 class="exp-title">AI was trained on the artist's own layered smoke work, not text prompts</h3>
+      <p class="exp-body">VEXA pieces begin as real smoke compositions layered by hand in Adobe. That work was used to train an AI model, which then acts as a collaborator: transforming the smoke into portraits under the artist's direction. The AI did not create these. It was taught to see through them.</p>
+    </div>
+    <div class="exp-card reveal reveal-d3">
+      <span class="exp-num">03</span>
+      <span class="exp-q">How does ownership work?</span>
+      <h3 class="exp-title">45 pieces. Some are one of a kind. Some are limited editions.</h3>
+      <p class="exp-body">Each VEXA piece is either a 1/1 (the only copy that will ever exist) or a limited edition, available in two forms: digital or printed and hand-signed by the artist. Printed editions are exclusive to the Lisbon exhibition. Every piece is recorded on the blockchain so ownership is permanent and verifiable.</p>
+    </div>
+    <div class="exp-card reveal">
+      <span class="exp-num">04</span>
+      <span class="exp-q">Why Lisbon?</span>
+      <h3 class="exp-title">The NFC Summit is where art and technology meet</h3>
+      <p class="exp-body">The NFC Lisbon Summit brings together artists, collectors, and technologists at the frontier of digital culture. VEXA debuts here because it belongs at that intersection; this is not art about technology. It is art that technology made possible.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PORTRAIT REVEAL -->
+<section id="portrait-reveal" aria-label="The Work">
+  <div class="pr-text">
+    <div class="pr-eyebrow reveal">The Work</div>
+    <h2 class="pr-title reveal">Energy does not disappear.<br><em>It transforms.</em></h2>
+    <p class="pr-body reveal">VEXA is a volumetric smoke portrait series that gives form to what most art leaves invisible: the interior life of energy itself. Each piece is built from hand-made smoke compositions used to train AI and generate exquisite pieces, transformed through a rigorous visual process that preserves the character of the original material while revealing the emotional architecture beneath.</p>
+    <p class="pr-body reveal">Five thousand years of energy measurement data inform the series. The work is not symbolic. It is structural. VEXA speaks in the language that energy has always spoken, and asks the viewer to listen with their body before their mind.</p>
+    <div class="stats reveal">
+      <div><div class="stat-num">45</div><div class="stat-lbl">Digital Pieces</div></div>
+      <div><div class="stat-num">3</div><div class="stat-lbl">Cycles</div></div>
+      <div><div class="stat-num">5K</div><div class="stat-lbl">Years of Data</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BALANCE — VEXA weighing Humanity vs AI -->
+<section id="balance" class="wm" aria-label="The Question She Holds">
+  <img class="bal-img" src="./images/portrait.webp" alt="VEXA Balance — Humanity and AI" loading="lazy">
+  <div class="bal-overlay"></div>
+  <div class="bal-text">
+    <div class="bal-eyebrow reveal">The Question She Holds</div>
+    <h2 class="bal-title reveal">Humanity.<br>Artificial Intelligence.<br><em>Who tips the scale?</em></h2>
+    <p class="bal-sub reveal">VEXA does not answer. She measures.</p>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery" class="wm" aria-label="Gallery">
+  <div class="gallery-wide reveal">
+    <img src="./images/balance.webp" alt="VEXA Blue Eyes" loading="lazy">
+    <span class="gallery-wide-label">Blue Eyes Emerging</span>
+  </div>
+  <div class="gallery-duo">
+    <div class="gallery-duo-item reveal reveal-d1">
+      <img src="./images/gallery-wide.webp" alt="VEXA Layer One" loading="lazy">
+      <span class="gallery-duo-label">VEXA Layer I</span>
+    </div>
+    <div class="gallery-duo-item reveal reveal-d2">
+      <img src="./images/gallery-duo-1.webp" alt="VEXA Equations" loading="lazy">
+      <span class="gallery-duo-label">The Equations of Energy</span>
+    </div>
+  </div>
+</section>
+
+<!-- CYCLES -->
+<section id="cycles" aria-label="The Three Cycles">
+  <div class="cycles-hd reveal">
+    <div class="ey">The Three Cycles</div>
+    <h2>Every portrait belongs to a movement.</h2>
+  </div>
+  <div class="cycles-grid">
+    <div class="cycle-card reveal reveal-d1">
+      <span class="c-roman">I</span>
+      <h3 class="c-title">Grieving</h3>
+      <p class="c-desc">Energy contracting inward. The portrait of loss as a physical event. What is held when letting go is impossible. Smoke folding on itself in the dark.</p>
+      <span class="c-count">Pieces 01 to 15</span>
+    </div>
+    <div class="cycle-card reveal reveal-d2">
+      <span class="c-roman">II</span>
+      <h3 class="c-title">Weight</h3>
+      <p class="c-desc">The suspension between states. Energy neither arriving nor departing. The portrait of burden as a form of resistance. Smoke holding its shape against gravity.</p>
+      <span class="c-count">Pieces 16 to 30</span>
+    </div>
+    <div class="cycle-card reveal reveal-d3">
+      <span class="c-roman">III</span>
+      <h3 class="c-title">Liberation</h3>
+      <p class="c-desc">Energy finding its people. The portrait of release as structural truth. What happens when the weight no longer requires holding. Smoke becoming atmosphere.</p>
+      <span class="c-count">Pieces 31 to 45</span>
+    </div>
+  </div>
+</section>
+
+<!-- SELECTED WORKS -->
+<section id="selected-works" aria-label="Selected Works">
+  <div class="sw-hd">
+    <span class="ey reveal">Selected Works</span>
+    <h2 class="reveal">From hands to algorithm.<br><em>The complete journey.</em></h2>
+  </div>
+
+  <!-- Chapter I: The Source -->
+  <div class="sw-chapter">
+    <div class="sw-chapter-label reveal">
+      <span class="sw-chapter-num">I</span>
+      <div>
+        <span class="sw-chapter-title">The Source</span>
+        <span class="sw-chapter-sub">Every VEXA portrait began as one of these.<br>Real smoke, shaped by hand in Adobe. The original language.</span>
+      </div>
+    </div>
+    <div class="sw-grid">
+      <div class="sw-item sw-invert reveal reveal-d1">
+        <img src="./images/inner-self.webp" alt="Inner Self, handmade smoke" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">Handmade</span>
+          <span class="sw-title">Inner Self</span>
+          <span class="sw-cycle">Adobe &nbsp;&nbsp; Not AI</span>
+        </div>
+      </div>
+      <div class="sw-item reveal reveal-d2">
+        <img src="./images/the-road.webp" alt="The Road, handmade smoke" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">Handmade</span>
+          <span class="sw-title">The Road</span>
+          <span class="sw-cycle">Adobe &nbsp;&nbsp; Not AI</span>
+        </div>
+      </div>
+      <div class="sw-item sw-invert reveal reveal-d3">
+        <img src="./images/disconnection.webp" alt="Disconnection, handmade smoke" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">Handmade</span>
+          <span class="sw-title">Disconnection</span>
+          <span class="sw-cycle">Adobe &nbsp;&nbsp; Not AI</span>
+        </div>
+      </div>
+      <div class="sw-item reveal reveal-d1">
+        <img src="./images/lost-souls.webp" alt="Lost Souls, handmade smoke" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">Handmade</span>
+          <span class="sw-title">Lost Souls</span>
+          <span class="sw-cycle">Adobe &nbsp;&nbsp; Not AI</span>
+        </div>
+      </div>
+      <div class="sw-item sw-invert reveal reveal-d2">
+        <img src="./images/touch.webp" alt="Touch, handmade smoke" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">Handmade</span>
+          <span class="sw-title">Touch</span>
+          <span class="sw-cycle">Adobe &nbsp;&nbsp; Not AI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chapter II: The Transformation -->
+  <div class="sw-chapter">
+    <div class="sw-chapter-label reveal">
+      <span class="sw-chapter-num">II</span>
+      <div>
+        <span class="sw-chapter-title">The Transformation</span>
+        <span class="sw-chapter-sub">What the smoke became.</span>
+      </div>
+    </div>
+    <div class="sw-grid">
+      <div class="sw-item reveal reveal-d1">
+        <img src="./images/hero-bg.webp" alt="Cosmic Portal, VEXA series" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">VEXA 01</span>
+          <span class="sw-title">Cosmic Portal</span>
+          <span class="sw-cycle">Cycle I &nbsp;&nbsp; Grieving</span>
+        </div>
+      </div>
+      <div class="sw-item reveal reveal-d2">
+        <img src="./images/balance.webp" alt="Blue Eyes Emerging, VEXA series" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">VEXA 08</span>
+          <span class="sw-title">Blue Eyes Emerging</span>
+          <span class="sw-cycle">Cycle I &nbsp;&nbsp; Grieving</span>
+        </div>
+      </div>
+      <div class="sw-item reveal reveal-d3">
+        <img src="./images/portrait.webp" alt="The Balance, VEXA series" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">VEXA 12</span>
+          <span class="sw-title">The Balance</span>
+          <span class="sw-cycle">Cycle II &nbsp;&nbsp; Weight</span>
+        </div>
+      </div>
+      <div class="sw-item sw-invert reveal reveal-d1">
+        <img src="./images/weight-tbd-1.webp" alt="Untitled, VEXA series Cycle II" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">VEXA &nbsp;&nbsp; Cycle II</span>
+          <span class="sw-title">TBD</span>
+          <span class="sw-cycle">Cycle II &nbsp;&nbsp; Weight</span>
+        </div>
+      </div>
+      <div class="sw-item sw-invert reveal reveal-d2">
+        <img src="./images/weight-tbd-2.webp" alt="Untitled, VEXA series Cycle II" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">VEXA &nbsp;&nbsp; Cycle II</span>
+          <span class="sw-title">TBD</span>
+          <span class="sw-cycle">Cycle II &nbsp;&nbsp; Weight</span>
+        </div>
+      </div>
+      <div class="sw-item sw-invert reveal reveal-d3">
+        <img src="./images/dragon.webp" alt="Dragon, VEXA series" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">VEXA</span>
+          <span class="sw-title">Dragon</span>
+          <span class="sw-cycle">Cycle III &nbsp;&nbsp; Liberation</span>
+        </div>
+      </div>
+      <div class="sw-item reveal reveal-d2">
+        <img src="./images/gallery-duo-1.webp" alt="Equations of Energy, VEXA series" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">VEXA 31</span>
+          <span class="sw-title">Equations of Energy</span>
+          <span class="sw-cycle">Cycle III &nbsp;&nbsp; Liberation</span>
+        </div>
+      </div>
+      <div class="sw-item sw-invert reveal reveal-d3">
+        <img src="./images/road-home.webp" alt="The Road Home, VEXA series" loading="lazy">
+        <div class="sw-info">
+          <span class="sw-num">VEXA</span>
+          <span class="sw-title">The Road Home</span>
+          <span class="sw-cycle">Cycle III &nbsp;&nbsp; Liberation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE over equations -->
+<section id="quote" class="wm" aria-label="Artist Quote">
+  <img class="q-img" src="./images/gallery-duo-2.webp" alt="" loading="lazy">
+  <div class="q-overlay"></div>
+  <div class="q-content">
+    <p class="q-text reveal">Energy always finds its people.<br>VEXA is where it begins to speak.</p>
+    <p class="q-attr reveal">&mdash; SHILLS</p>
+  </div>
+</section>
+
+<!-- DEBUT -->
+<section id="debut" aria-label="World Debut">
+  <div class="d-eye reveal">World Debut</div>
+  <h2 class="d-title reveal"><a href="https://www.nfcsummit.com/" target="_blank" rel="noopener">NFC LISBON SUMMIT<span class="sr-only"> (opens in new tab)</span></a></h2>
+  <p class="d-loc reveal">Lisbon, Portugal</p>
+  <div class="countdown reveal" aria-live="polite" aria-label="Countdown to debut">
+    <div class="cd-unit"><span class="cd-num" id="cd-days">--</span><span class="cd-lbl">Days</span></div>
+    <div class="cd-unit"><span class="cd-num" id="cd-hours">--</span><span class="cd-lbl">Hours</span></div>
+    <div class="cd-unit"><span class="cd-num" id="cd-mins">--</span><span class="cd-lbl">Minutes</span></div>
+    <div class="cd-unit"><span class="cd-num" id="cd-secs">--</span><span class="cd-lbl">Seconds</span></div>
+  </div>
+  <p class="cd-note reveal">Until World Debut</p>
+  <div class="d-details reveal">
+    <div class="d-item"><span class="d-val">JUNE</span><span class="d-lbl">Month</span></div>
+    <div class="d-item"><span class="d-val">2026</span><span class="d-lbl">Year</span></div>
+    <div class="d-item"><span class="d-val">45</span><span class="d-lbl">Pieces</span></div>
+    <div class="d-item"><span class="d-val">1/1 &amp; EDITIONS</span><span class="d-lbl">Select pieces available<br>as limited editions</span></div>
+    <div class="d-item"><span class="d-val">LISBON ONLY</span><span class="d-lbl">Signed prints<br>exclusive to the exhibition</span></div>
+  </div>
+</section>
+
+<!-- ARTISTS TEASER -->
+<section id="artists-teaser" aria-label="The Artists Behind VEXA">
+  <p class="at-eyebrow reveal">The Collective</p>
+  <h2 class="at-title reveal">The power of WE<br><em>over ME.</em></h2>
+  <p class="at-sub reveal">Not collaborators. Extensions. The power of WE over ME.</p>
+  <div class="at-names reveal">
+    <a class="at-name" href="https://x.com/andresdelvecc" target="_blank" rel="noopener">Adres Del Vecchio</a>
+    <a class="at-name" href="https://x.com/bakuartiste" target="_blank" rel="noopener">Baku</a>
+    <a class="at-name" href="https://x.com/lampwrecked_" target="_blank" rel="noopener">Lamp</a>
+    <a class="at-name" href="https://x.com/mariafynsknorup" target="_blank" rel="noopener">Maria Fynsk Norup</a>
+    <a class="at-name" href="https://x.com/nuclearsamurai" target="_blank" rel="noopener">Nuclear Samuri</a>
+    <a class="at-name" href="https://x.com/OmarZRobles" target="_blank" rel="noopener">Omar ZRobles</a>
+    <a class="at-name" href="https://x.com/serc1n" target="_blank" rel="noopener">Serc</a>
+    <span class="at-name tbd">TBD</span>
+  </div>
+  <a class="at-cta reveal" href="collabs.html">Meet the artists <span class="at-cta-arrow" aria-hidden="true">&#8594;</span></a>
+</section>
+
+<!-- VIDEO -->
+<section id="video-section" aria-label="VEXA Showcase Video">
+  <p class="video-label">VEXA — 2026</p>
+  <div class="video-wrap wm">
+    <video autoplay muted loop playsinline controls controlsList="nodownload" aria-label="VEXA 2026 Ethereal Cosmic animated showcase">
+      <source src="./images/vexa-animated.mp4" type="video/mp4">
+    </video>
+  </div>
+</section>
+</main>
+
+
+<footer>
+  <span class="f-brand">VEXA &nbsp;/&nbsp; SHILLS</span>
+  <span class="f-credit">Part of the <a href="https://waitandhopefoundation.org" target="_blank" rel="noopener">Wait &amp; Hope Foundation<span class="sr-only"> (opens in new tab)</span></a> digital art program.<br><span style="opacity:.5">&copy; 2026 SHILLS. All rights reserved.</span></span>
+  <div class="f-social">
+    <a href="https://x.com/shills" target="_blank" rel="noopener">X / Twitter<span class="sr-only"> (opens in new tab)</span></a>
+    <a href="https://drip.haus/shills" target="_blank" rel="noopener">DRiP Haus<span class="sr-only"> (opens in new tab)</span></a>
+  </div>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='60px';ring.style.height='60px';ring.style.borderColor='rgba(201,168,76,.7)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(201,168,76,.4)';});
+});
+const hamburger=document.getElementById('hamburger'),navMobile=document.getElementById('nav-mobile');
+hamburger.addEventListener('click',()=>{const open=navMobile.classList.toggle('open');hamburger.setAttribute('aria-expanded',String(open));navMobile.setAttribute('aria-hidden',String(!open));});
+function closeMobileNav(){navMobile.classList.remove('open');hamburger.setAttribute('aria-expanded','false');navMobile.setAttribute('aria-hidden','true');}
+(function countdown(){const target=new Date('2026-06-04T09:00:00+01:00').getTime();function tick(){const now=Date.now(),diff=target-now;if(diff<=0){document.getElementById('cd-days').textContent='00';document.getElementById('cd-hours').textContent='00';document.getElementById('cd-mins').textContent='00';document.getElementById('cd-secs').textContent='00';return;}const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);document.getElementById('cd-days').textContent=String(d).padStart(2,'0');document.getElementById('cd-hours').textContent=String(h).padStart(2,'0');document.getElementById('cd-mins').textContent=String(m).padStart(2,'0');document.getElementById('cd-secs').textContent=String(s).padStart(2,'0');setTimeout(tick,1000);}tick();})();
+document.querySelectorAll('img,video').forEach(el=>{el.addEventListener('contextmenu',e=>e.preventDefault());el.addEventListener('dragstart',e=>e.preventDefault());});
+const reveals=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*70);obs.unobserve(e.target);}});},{threshold:.1});
+reveals.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

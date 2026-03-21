@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEXA — The Artists</title>
+<meta name="description" content="The artists who shaped VEXA. A 45-piece digital art series debuting at NFC Lisbon Summit, June 2026.">
+<meta name="theme-color" content="#050507">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.vexa45.com/collabs.html">
+<meta property="og:title" content="VEXA — The Artists">
+<meta property="og:description" content="The artists who shaped VEXA. A 45-piece digital art series debuting at NFC Lisbon Summit, June 2026.">
+<meta property="og:image" content="https://www.vexa45.com/images/hero-bg.webp">
+<!-- Twitter / X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@shills">
+<meta name="twitter:title" content="VEXA — The Artists">
+<meta name="twitter:description" content="The artists who shaped VEXA. A 45-piece digital art series debuting at NFC Lisbon Summit, June 2026.">
+<meta name="twitter:image" content="https://www.vexa45.com/images/hero-bg.webp">
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23050507'/><text x='50%25' y='56%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='22' fill='%23c9a84c'>V</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Syncopate:wght@400;700&family=Space+Mono:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --black:#050507;--smoke-white:#e8e4de;--ember:#ff6b35;
+  --vapor:#b0c4de;--gold:#c9a84c;--mist:rgba(232,228,222,0.05);
+  --fd:'Syncopate',sans-serif;--fb:'Cormorant Garamond',serif;--fm:'Space Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--smoke-white);font-family:'Cormorant Garamond',serif;overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;width:8px;height:8px;background:var(--ember);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;}
+.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(201,168,76,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:100;opacity:.3;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:28px clamp(20px,4vw,48px);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(5,5,7,0.92) 0%,transparent 100%);}
+.nav-logo{font-family:'Syncopate',sans-serif;font-size:.85rem;letter-spacing:.3em;color:var(--smoke-white);text-decoration:none;opacity:.85;}
+.nav-links{display:none;gap:40px;list-style:none;}
+.nav-links a{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.18em;color:var(--smoke-white);text-decoration:none;opacity:.75;text-transform:uppercase;transition:opacity .3s,color .3s;}
+.nav-links a:hover,.nav-links a.active{opacity:1;color:var(--gold);}
+.nav-hamburger{display:flex;flex-direction:column;gap:6px;background:rgba(5,5,7,.7);border:1px solid rgba(201,168,76,.35);border-radius:6px;cursor:pointer;padding:10px 12px;z-index:51;transition:border-color .3s,background .3s,box-shadow .3s;box-shadow:0 0 14px rgba(201,168,76,.15),0 2px 8px rgba(5,5,7,.6);}
+.nav-hamburger:hover{border-color:var(--gold);background:rgba(201,168,76,.08);box-shadow:0 0 22px rgba(201,168,76,.3),0 2px 8px rgba(5,5,7,.6);}
+.nav-hamburger span{width:26px;height:2px;background:var(--smoke-white);display:block;}
+.nav-mobile{display:none;position:fixed;inset:0;background:rgba(5,5,7,.97);z-index:49;flex-direction:column;align-items:center;justify-content:center;gap:48px;}
+.nav-mobile.open{display:flex;}
+.nav-mobile a{font-family:'Space Mono',monospace;font-size:.85rem;letter-spacing:.22em;color:var(--smoke-white);text-decoration:none;text-transform:uppercase;opacity:.75;transition:opacity .3s,color .3s;}
+.nav-mobile a:hover,.nav-mobile a.active{opacity:1;color:var(--gold);}
+.nav-close{background:none;border:1px solid rgba(232,228,222,.15);color:rgba(232,228,222,.5);font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;padding:10px 24px;cursor:pointer;margin-top:16px;transition:border-color .3s,color .3s;}
+.nav-close:hover{border-color:var(--gold);color:var(--gold);}
+
+/* HERO */
+#collab-hero{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:clamp(72px,7vw,88px) clamp(20px,4vw,48px) clamp(16px,2vw,24px);}
+#collab-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(201,168,76,.06) 0%,transparent 65%),linear-gradient(to bottom,rgba(5,5,7,.6) 0%,transparent 40%,rgba(5,5,7,.4) 100%);z-index:1;pointer-events:none;}
+.ch-inner{position:relative;z-index:2;width:100%;max-width:min(960px,92vw);display:flex;flex-direction:column;align-items:center;}
+.ch-eyebrow{font-family:'Space Mono',monospace;font-size:.88rem;letter-spacing:.38em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;opacity:.9;animation:fadeUp .9s ease .2s both;}
+.ch-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.4rem);font-weight:300;font-style:italic;line-height:1.2;color:var(--smoke-white);margin-bottom:12px;animation:fadeUp 1.1s ease .4s both;}
+.ch-sub{font-family:'Space Mono',monospace;font-size:clamp(.65rem,.9vw,.82rem);letter-spacing:.22em;color:rgba(232,228,222,.45);text-transform:uppercase;max-width:560px;line-height:1.8;animation:fadeUp 1.1s ease .6s both;}
+.ch-rule{width:1px;height:24px;background:linear-gradient(to bottom,transparent,rgba(201,168,76,.35),transparent);margin:16px auto 0;display:block;animation:fadeIn 1.2s ease .8s both;}
+
+/* GRID */
+#collab-grid-section{padding:clamp(12px,1.5vw,20px) clamp(20px,4vw,48px) clamp(36px,4vw,56px);}
+.collab-count{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.28em;color:rgba(232,228,222,.35);text-transform:uppercase;text-align:center;margin-bottom:clamp(16px,2vw,24px);}
+.collab-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;max-width:min(1100px,96vw);margin:0 auto;}
+
+/* CARD */
+.collab-card{background:var(--mist);border:1px solid rgba(232,228,222,.06);position:relative;overflow:hidden;transition:border-color .4s,background .4s;}
+.collab-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:0;transition:opacity .4s;z-index:2;}
+.collab-card:hover{background:rgba(201,168,76,.03);border-color:rgba(201,168,76,.2);}
+.collab-card:hover::before{opacity:1;}
+
+/* Image slot */
+.collab-img-wrap{position:relative;overflow:hidden;aspect-ratio:3/4;width:100%;}
+.collab-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:brightness(.82) grayscale(.15);transition:filter .5s,transform .7s;-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-select:none;pointer-events:auto;}
+.collab-card:hover .collab-img-wrap img{filter:brightness(.96) grayscale(0);transform:scale(1.03);}
+
+/* Initials placeholder */
+.collab-initial{aspect-ratio:3/4;width:100%;background:rgba(232,228,222,.03);display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(201,168,76,.1);}
+.collab-initial span{font-family:'Syncopate',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--gold);opacity:.25;letter-spacing:.08em;}
+
+/* Card info */
+.collab-info{padding:10px 12px 14px;}
+.collab-discipline{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.28em;color:var(--gold);opacity:.7;text-transform:uppercase;margin-bottom:4px;display:block;}
+.collab-name{font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,1.4vw,1.25rem);font-weight:300;color:var(--smoke-white);line-height:1.2;margin-bottom:6px;}
+.collab-link{display:inline-block;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.2em;color:rgba(232,228,222,.5);text-transform:uppercase;text-decoration:none;border-bottom:1px solid rgba(232,228,222,.15);padding-bottom:2px;transition:color .3s,border-color .3s;}
+.collab-link:hover{color:var(--gold);border-color:rgba(201,168,76,.5);}
+
+/* FOOTER */
+footer{position:relative;z-index:1;padding:clamp(16px,2vw,24px) clamp(20px,4vw,48px);border-top:1px solid rgba(232,228,222,.06);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px;}
+.f-brand{font-family:'Syncopate',sans-serif;font-size:.75rem;letter-spacing:.3em;color:var(--smoke-white);opacity:.6;}
+.f-credit{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.15em;color:rgba(232,228,222,.6);text-align:center;line-height:1.9;}
+.f-credit a{color:var(--gold);text-decoration:none;opacity:.85;transition:opacity .3s;}
+.f-credit a:hover{opacity:1;}
+.f-social{display:flex;gap:28px;}
+.f-social a{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.2em;color:rgba(232,228,222,.7);text-decoration:none;text-transform:uppercase;transition:color .3s;}
+.f-social a:hover{color:var(--gold);}
+
+/* SHARED UTILITIES */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .9s ease,transform .9s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:.1s;}
+.reveal-d2{transition-delay:.2s;}
+.reveal-d3{transition-delay:.3s;}
+.reveal-d4{transition-delay:.4s;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+img{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-select:none;}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}.reveal{opacity:1;transform:none;}}
+
+@media(max-width:700px){
+  .collab-grid{grid-template-columns:repeat(2,1fr);}
+  footer{justify-content:center;text-align:center;}
+  footer .f-social{justify-content:center;}
+}
+@media(max-width:400px){
+  .collab-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+
+<a class="sr-only" href="#collab-grid-section">Skip to artist grid</a>
+
+<nav aria-label="Main navigation">
+  <a class="nav-logo" href="index.html">VEXA</a>
+  <ul class="nav-links">
+    <li><a href="index.html#portrait-reveal">The Work</a></li>
+    <li><a href="index.html#selected-works">Gallery</a></li>
+    <li><a href="index.html#cycles">The Cycles</a></li>
+    <li><a href="index.html#debut">The Debut</a></li>
+    <li><a href="collabs.html" class="active">Artists</a></li>
+  </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Open navigation menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<nav class="nav-mobile" id="nav-mobile" aria-label="Mobile navigation" aria-hidden="true">
+  <a href="index.html#portrait-reveal" onclick="closeMobileNav()">The Work</a>
+  <a href="index.html#selected-works" onclick="closeMobileNav()">Gallery</a>
+  <a href="index.html#cycles" onclick="closeMobileNav()">The Cycles</a>
+  <a href="index.html#debut" onclick="closeMobileNav()">The Debut</a>
+  <a href="collabs.html" class="active">Artists</a>
+  <button class="nav-close" onclick="closeMobileNav()">Close</button>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section id="collab-hero" aria-label="Artists introduction">
+  <div class="ch-inner">
+    <span class="ch-eyebrow">VEXA &mdash; The Collective</span>
+    <h1 class="ch-title">Part of the world she is building.</h1>
+    <p class="ch-sub">Not collaborators. Extensions. The power of WE over ME.</p>
+    <span class="ch-rule" aria-hidden="true"></span>
+  </div>
+</section>
+
+<!-- ARTIST GRID -->
+<section id="collab-grid-section" aria-label="Collaborating artists">
+  <p class="collab-count">The Collective &nbsp;&mdash;&nbsp; Growing</p>
+
+  <div class="collab-grid">
+
+    <!-- Adres Del Vecchio -->
+    <article class="collab-card reveal">
+      <div class="collab-img-wrap">
+        <img src="./images/collabs/andres-del-vecchio.webp" alt="Adres Del Vecchio" loading="lazy">
+      </div>
+      <div class="collab-info">
+        <span class="collab-discipline">Artist</span>
+        <h2 class="collab-name">Adres Del Vecchio</h2>
+        <a class="collab-link" href="https://x.com/andresdelvecc" target="_blank" rel="noopener">@andresdelvecc<span class="sr-only"> (opens in new tab)</span></a>
+      </div>
+    </article>
+
+    <!-- Baku -->
+    <article class="collab-card reveal reveal-d1">
+      <div class="collab-img-wrap">
+        <img src="./images/collabs/baku.jpg" alt="Baku" loading="lazy">
+      </div>
+      <div class="collab-info">
+        <span class="collab-discipline">Artist</span>
+        <h2 class="collab-name">Baku</h2>
+        <a class="collab-link" href="https://x.com/bakuartiste" target="_blank" rel="noopener">@bakuartiste<span class="sr-only"> (opens in new tab)</span></a>
+      </div>
+    </article>
+
+    <!-- Lamp -->
+    <article class="collab-card reveal reveal-d2">
+      <div class="collab-img-wrap">
+        <img src="./images/collabs/lamp.webp" alt="Lamp" loading="lazy">
+      </div>
+      <div class="collab-info">
+        <span class="collab-discipline">Artist</span>
+        <h2 class="collab-name">Lamp</h2>
+        <a class="collab-link" href="https://x.com/lampwrecked_" target="_blank" rel="noopener">@lampwrecked_<span class="sr-only"> (opens in new tab)</span></a>
+      </div>
+    </article>
+
+    <!-- Maria Fynsk Norup -->
+    <article class="collab-card reveal reveal-d3">
+      <div class="collab-img-wrap">
+        <img src="./images/collabs/maria-fynsknorup.jpg" alt="Maria Fynsk Norup" loading="lazy">
+      </div>
+      <div class="collab-info">
+        <span class="collab-discipline">Artist</span>
+        <h2 class="collab-name">Maria Fynsk Norup</h2>
+        <a class="collab-link" href="https://x.com/mariafynsknorup" target="_blank" rel="noopener">@mariafynsknorup<span class="sr-only"> (opens in new tab)</span></a>
+      </div>
+    </article>
+
+    <!-- Nuclear Samuri -->
+    <article class="collab-card reveal reveal-d4">
+      <div class="collab-img-wrap">
+        <img src="./images/collabs/nuclear-samurai.jpg" alt="Nuclear Samuri" loading="lazy">
+      </div>
+      <div class="collab-info">
+        <span class="collab-discipline">Artist</span>
+        <h2 class="collab-name">Nuclear Samuri</h2>
+        <a class="collab-link" href="https://x.com/nuclearsamurai" target="_blank" rel="noopener">@nuclearsamurai<span class="sr-only"> (opens in new tab)</span></a>
+      </div>
+    </article>
+
+    <!-- Omar ZRobles -->
+    <article class="collab-card reveal">
+      <div class="collab-img-wrap">
+        <img src="./images/collabs/omar-zrobles.webp" alt="Omar ZRobles" loading="lazy">
+      </div>
+      <div class="collab-info">
+        <span class="collab-discipline">Artist</span>
+        <h2 class="collab-name">Omar ZRobles</h2>
+        <a class="collab-link" href="https://x.com/OmarZRobles" target="_blank" rel="noopener">@OmarZRobles<span class="sr-only"> (opens in new tab)</span></a>
+      </div>
+    </article>
+
+    <!-- Serc -->
+    <article class="collab-card reveal reveal-d1">
+      <div class="collab-img-wrap">
+        <img src="./images/collabs/serc.jpg" alt="Serc" loading="lazy">
+      </div>
+      <div class="collab-info">
+        <span class="collab-discipline">Artist</span>
+        <h2 class="collab-name">Serc</h2>
+        <a class="collab-link" href="https://x.com/serc1n" target="_blank" rel="noopener">@serc1n<span class="sr-only"> (opens in new tab)</span></a>
+      </div>
+    </article>
+
+    <!-- TBD -->
+    <article class="collab-card reveal reveal-d2">
+      <div class="collab-initial" aria-hidden="true"><span>?</span></div>
+      <div class="collab-info">
+        <span class="collab-discipline">Artist</span>
+        <h2 class="collab-name">TBD</h2>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <span class="f-brand">VEXA &nbsp;/&nbsp; SHILLS</span>
+  <span class="f-credit">Part of the <a href="https://waitandhopefoundation.org" target="_blank" rel="noopener">Wait &amp; Hope Foundation<span class="sr-only"> (opens in new tab)</span></a> digital art program.<br><span style="opacity:.5">&copy; 2026 SHILLS. All rights reserved.</span></span>
+  <div class="f-social">
+    <a href="https://x.com/shills" target="_blank" rel="noopener">X / Twitter<span class="sr-only"> (opens in new tab)</span></a>
+    <a href="https://drip.haus/shills" target="_blank" rel="noopener">DRiP Haus<span class="sr-only"> (opens in new tab)</span></a>
+  </div>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='60px';ring.style.height='60px';ring.style.borderColor='rgba(201,168,76,.7)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(201,168,76,.4)';});
+});
+const hamburger=document.getElementById('hamburger'),navMobile=document.getElementById('nav-mobile');
+hamburger.addEventListener('click',()=>{const open=navMobile.classList.toggle('open');hamburger.setAttribute('aria-expanded',String(open));navMobile.setAttribute('aria-hidden',String(!open));});
+function closeMobileNav(){navMobile.classList.remove('open');hamburger.setAttribute('aria-expanded','false');navMobile.setAttribute('aria-hidden','true');}
+document.querySelectorAll('img').forEach(el=>{el.addEventListener('contextmenu',e=>e.preventDefault());el.addEventListener('dragstart',e=>e.preventDefault());});
+const reveals=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);obs.unobserve(e.target);}});},{threshold:.08});
+reveals.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
