@@ -96,7 +96,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .nav-hamburger.open span:nth-child(1){transform:translateY(8px) rotate(45deg);}
 .nav-hamburger.open span:nth-child(2){opacity:0;}
 .nav-hamburger.open span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
-.nav-mobile{display:none;position:fixed;inset:0;background:rgba(5,5,7,.97);z-index:53;flex-direction:column;align-items:center;justify-content:center;gap:48px;}
+.nav-mobile{display:none;position:fixed;inset:0;background:rgba(5,5,7,.97);z-index:53;flex-direction:column;align-items:center;justify-content:center;gap:48px;padding-top:15vh;}
 .nav-mobile.open{display:flex;}
 .nav-mobile a{font-family:'Space Mono',monospace;font-size:.85rem;letter-spacing:.22em;color:var(--smoke-white);text-decoration:none;text-transform:uppercase;opacity:.75;transition:opacity .3s,color .3s;}
 .nav-mobile a:hover{opacity:1;color:var(--gold);}
@@ -399,10 +399,10 @@ img,video{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-se
   </button>
 </nav>
 <nav class="nav-mobile" id="nav-mobile" aria-label="Mobile navigation" aria-hidden="true">
-  <a href="#portrait-reveal" onclick="closeMobileNav()">The Work</a>
-  <a href="#selected-works" onclick="closeMobileNav()">Gallery</a>
-  <a href="#cycles" onclick="closeMobileNav()">The Cycles</a>
-  <a href="#debut" onclick="closeMobileNav()">The Debut</a>
+  <a href="#portrait-reveal" onclick="event.preventDefault();navToSection('portrait-reveal')">The Work</a>
+  <a href="#selected-works" onclick="event.preventDefault();navToSection('selected-works')">Gallery</a>
+  <a href="#cycles" onclick="event.preventDefault();navToSection('cycles')">The Cycles</a>
+  <a href="#debut" onclick="event.preventDefault();navToSection('debut')">The Debut</a>
   <a href="collabs.html">The Collective</a>
   <a href="about.html">About Shills</a>
   <div class="nav-notify">
@@ -780,6 +780,7 @@ document.querySelectorAll('a,button').forEach(el=>{
 const hamburger=document.getElementById('hamburger'),navMobile=document.getElementById('nav-mobile');
 hamburger.addEventListener('click',()=>{const open=navMobile.classList.toggle('open');hamburger.classList.toggle('open',open);hamburger.setAttribute('aria-expanded',String(open));navMobile.setAttribute('aria-hidden',String(!open));});
 function closeMobileNav(){navMobile.classList.remove('open');hamburger.classList.remove('open');hamburger.setAttribute('aria-expanded','false');navMobile.setAttribute('aria-hidden','true');}
+function navToSection(id){closeMobileNav();setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});},80);}
 (function countdown(){const target=new Date('2026-06-04T09:00:00+01:00').getTime();function tick(){const now=Date.now(),diff=target-now;if(diff<=0){document.getElementById('cd-days').textContent='00';document.getElementById('cd-hours').textContent='00';document.getElementById('cd-mins').textContent='00';document.getElementById('cd-secs').textContent='00';return;}const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);document.getElementById('cd-days').textContent=String(d).padStart(2,'0');document.getElementById('cd-hours').textContent=String(h).padStart(2,'0');document.getElementById('cd-mins').textContent=String(m).padStart(2,'0');document.getElementById('cd-secs').textContent=String(s).padStart(2,'0');setTimeout(tick,1000);}tick();})();
 document.querySelectorAll('img,video').forEach(el=>{el.addEventListener('contextmenu',e=>e.preventDefault());el.addEventListener('dragstart',e=>e.preventDefault());});
 const reveals=document.querySelectorAll('.reveal');
