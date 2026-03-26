@@ -61,9 +61,6 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-user-select:none;user-select:n
 /* NAV */
 #main-nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:28px clamp(20px,4vw,48px);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(5,5,7,.92) 0%,transparent 100%);}
 .nav-logo{font-family:'Syncopate',sans-serif;font-size:.85rem;letter-spacing:.3em;color:var(--smoke-white);text-decoration:none;opacity:.85;}
-.nav-x-link{display:flex;align-items:center;justify-content:center;color:rgba(232,228,222,.5);transition:color .3s,opacity .3s;flex-shrink:0;}
-.nav-x-link:hover{color:var(--gold);opacity:1;}
-.nav-x-link svg{display:block;}
 .nav-hamburger{display:flex;flex-direction:column;gap:6px;background:rgba(5,5,7,.7);border:1px solid rgba(201,168,76,.35);border-radius:6px;cursor:pointer;padding:10px 12px;z-index:51;transition:border-color .3s,background .3s,box-shadow .3s;box-shadow:0 0 14px rgba(201,168,76,.15),0 2px 8px rgba(5,5,7,.6);}
 .nav-hamburger:hover{border-color:var(--gold);background:rgba(201,168,76,.08);box-shadow:0 0 22px rgba(201,168,76,.3),0 2px 8px rgba(5,5,7,.6);}
 .nav-hamburger span{width:26px;height:2px;background:var(--smoke-white);display:block;transition:transform .25s,opacity .25s;}
@@ -192,9 +189,6 @@ footer{display:flex;flex-direction:column;align-items:center;text-align:center;p
 .ap-name{font-family:'Syncopate',sans-serif;font-size:clamp(1.1rem,2.5vw,2rem);letter-spacing:.35em;color:var(--smoke-white);display:block;margin-bottom:10px;}
 .ap-role{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.28em;color:var(--gold);text-transform:uppercase;opacity:.85;}
 .ap-role-single{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;opacity:.85;}
-.ap-x-link{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-family:'Space Mono',monospace;font-size:.52rem;letter-spacing:.18em;color:rgba(232,228,222,.45);text-decoration:none;text-transform:uppercase;transition:color .3s,opacity .3s;}
-.ap-x-link:hover{color:var(--gold);opacity:1;}
-.ap-x-link svg{display:block;flex-shrink:0;}
 
 /* REVEAL */
 .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease;}
@@ -209,9 +203,6 @@ footer{display:flex;flex-direction:column;align-items:center;text-align:center;p
 
 <nav id="main-nav" aria-label="Main navigation">
   <a class="nav-logo" href="index.html">VEXA</a>
-  <a class="nav-x-link" href="https://x.com/shills_81" target="_blank" rel="noopener" aria-label="Follow SHILLS on X">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.745l7.73-8.835L1.254 2.25H8.08l4.213 5.567zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-  </a>
   <button class="nav-hamburger" id="hamburger" aria-label="Open navigation menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
@@ -241,10 +232,6 @@ footer{display:flex;flex-direction:column;align-items:center;text-align:center;p
   <div class="ap-caption">
     <span class="ap-name">SHILLS</span>
     <span class="ap-role-single">Creator of the WE Way™</span>
-    <a class="ap-x-link" href="https://x.com/shills_81" target="_blank" rel="noopener" aria-label="Follow SHILLS on X">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.745l7.73-8.835L1.254 2.25H8.08l4.213 5.567zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      @shills_81
-    </a>
   </div>
 </section>
 
