@@ -8,10 +8,9 @@
  * Runs three suites in sequence:
  *
  *   1. RENDERER — generates SVG passes for every combination of:
- *        • 5 built-in synthetic PFP images (zero setup, always runs)
- *        • any real images dropped into  qa/pfps/
+ *        • real images from qa/pfps/ (00-dr-lubie.jpg always first)
  *        × 5 token configurations (Genesis, Builder, Standard, Partner, Special)
- *        + 1 no-PFP pass (placeholder silhouette)
+ *        + 1 no-PFP placeholder pass
  *
  *   2. SMOKE    — sanity-checks the SVG output (non-empty, correct dims,
  *                 contains expected elements)
@@ -40,7 +39,7 @@ const { execSync }  = require('child_process');
 
 const { generateTokenImage }    = require('../renderer/passRenderer');
 const { loadPFP, loadPFPSync }  = require('../utils/pfpEmbed');
-const { TOKEN_CONFIGS, SYNTHETIC_PFPS } = require('./fixtures');
+const { TOKEN_CONFIGS } = require('./fixtures');
 
 // ─── CLI flags ────────────────────────────────────────────────────────────────
 
@@ -101,10 +100,8 @@ async function suiteRenderer(realPFPs) {
     ? TOKEN_CONFIGS.filter(c => c.tokenId === FILTER_TOKEN)
     : TOKEN_CONFIGS;
 
-  const allPFPs = [
-    ...SYNTHETIC_PFPS,
-    ...realPFPs,
-  ].filter(p => !FILTER_PFP || p.name.toLowerCase().includes(FILTER_PFP));
+  const allPFPs = realPFPs
+    .filter(p => !FILTER_PFP || p.name.toLowerCase().includes(FILTER_PFP));
 
   const passes = [];
   let passed = 0;
@@ -290,8 +287,7 @@ async function main() {
 
   // Load real PFPs from qa/pfps/
   const realPFPs = await loadRealPFPs();
-  info(`Synthetic PFPs: ${SYNTHETIC_PFPS.length}`);
-  info(`Real PFPs in qa/pfps/: ${realPFPs.length}`);
+  info(`PFPs in qa/pfps/: ${realPFPs.length}`);
   if (FILTER_PFP)   info(`Filter: --filter ${FILTER_PFP}`);
   if (FILTER_TOKEN) info(`Filter: --token ${FILTER_TOKEN}`);
 
