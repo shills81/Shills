@@ -61,17 +61,13 @@ function _fpPath(color) {
  */
 function fingerprintLogo(x, y, size, color = '#eb5b44', uid = '') {
   const vbX = FP_VB[color] ?? FP_VB['#eb5b44'];
-  const cpId = `fp-clip-${uid}`;
+  // viewBox crops to the exact variant region; overflow:hidden clips the rest.
+  // No internal clipPath needed — avoids userSpaceOnUse browser inconsistencies.
   return [
     `<svg x="${x}" y="${y}" width="${size}" height="${size}"`,
     `     viewBox="${vbX} ${FP_VB_Y} ${FP_VB_W} ${FP_VB_H}"`,
     `     overflow="hidden" xmlns="http://www.w3.org/2000/svg">`,
-    `  <defs>`,
-    `    <clipPath id="${cpId}">`,
-    `      <rect x="${vbX}" y="${FP_VB_Y}" width="${FP_VB_W}" height="${FP_VB_H}" rx="5.74"/>`,
-    `    </clipPath>`,
-    `  </defs>`,
-    `  <g transform="translate(86.33 -24.18)" clip-path="url(#${cpId})">`,
+    `  <g transform="translate(86.33 -24.18)">`,
     `    <path fill="${color}" d="${_fpPath(color)}"/>`,
     `  </g>`,
     `</svg>`,
@@ -111,24 +107,14 @@ const LL_MARK_PATH = 'M0 0c-23.35 0-41.835-5.972-53.404-17.929-10.883-11.24-12.1
  * @returns {string} SVG markup
  */
 function lubiesLLogo(x, y, size, _color, uid = '') {
-  const ca = `ll-a-${uid}`;
-  const cb = `ll-b-${uid}`;
+  // viewBox + overflow:hidden crops to exact artist logo region (pixel-verified).
+  // No internal clipPaths — avoids userSpaceOnUse browser inconsistencies.
   return [
     `<svg x="${x}" y="${y}" width="${size}" height="${size}"`,
     `     viewBox="${LL_VB}" overflow="hidden" xmlns="http://www.w3.org/2000/svg">`,
-    `  <defs>`,
-    `    <clipPath id="${ca}" clipPathUnits="userSpaceOnUse">`,
-    `      <path d="${LL_CLIP_A}"/>`,
-    `    </clipPath>`,
-    `    <clipPath id="${cb}" clipPathUnits="userSpaceOnUse">`,
-    `      <path d="${LL_CLIP_B}"/>`,
-    `    </clipPath>`,
-    `  </defs>`,
     `  <path d="${LL_BG_PATH}" fill="#eb5b44"`,
-    `        clip-path="url(#${ca})"`,
     `        transform="matrix(1.33333 0 0 -1.33333 762.177 607.429)"/>`,
     `  <path d="${LL_MARK_PATH}" fill="#ffffff"`,
-    `        clip-path="url(#${cb})"`,
     `        transform="matrix(1.33333 0 0 -1.33333 539.107 386.656)"/>`,
     `</svg>`,
   ].join('\n');
