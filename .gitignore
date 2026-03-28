@@ -1,2 +1,19 @@
 # Local Netlify folder
 .netlify
+
+# Dependencies
+node_modules/
+
+# Lock file
+package-lock.json
+
+# Generated output
+output/
+qa/results/
+
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
