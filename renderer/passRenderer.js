@@ -114,7 +114,6 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   const cp  = `banner-clip-${id}`;   // banner clip region
   const gid = `banner-fade-${id}`;   // bottom-fade gradient
   const fid = `pfp-filter-${id}`;    // silhouette filter
-  const mid = `pattern-mask-${id}`;  // pattern mask (hides pattern inside silhouette)
 
   // Banner clipPath: inner rounded top corners, straight bottom edge
   const bcp = [
@@ -127,31 +126,16 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
     `Q ${CARD.ix},${CARD.iy} ${CARD.ix + CARD.irx},${CARD.iy} Z`,
   ].join(' ');
 
-  // When PFP present:
-  //   - SVG mask punches the silhouette OUT of the pattern layer
-  //     (pattern only shows where character ISN'T — flows around outline)
-  //   - Silhouette rendered on top: dark fill + accent outline
-  const { dataURI, width: iw, height: ih } = pfpData || {};
+  const { width: iw, height: ih } = pfpData || {};
   const fit = pfpData ? _fitPFPInBanner(iw, ih) : null;
 
+  // Silhouette filter works on ALL image types (opaque JPEG/WebP/PNG).
+  // Uses a blur-glow approach instead of SourceAlpha so it doesn't need
+  // image transparency to produce an accent outline.
   const pfpFilterDef = pfpData ? _silhouetteFilterDef(fid, p) : '';
-  const patternMaskDef = pfpData ? `
-    <!-- Pattern mask: white = show pattern, black = hide (inside silhouette) -->
-    <mask id="${mid}">
-      <rect x="${CARD.ix}" y="${CARD.iy}" width="${CARD.iw}" height="${CARD.bannerH - CARD.iy}" fill="white"/>
-      <image href="${pfpData.dataURI}" x="${fit.x}" y="${fit.y}"
-             width="${fit.w}" height="${fit.h}"
-             preserveAspectRatio="xMidYMid meet"
-             filter="url(#silh-to-black-${id})"/>
-    </mask>
-    <!-- Collapse image alpha → solid black (for mask) -->
-    <filter id="silh-to-black-${id}" color-interpolation-filters="sRGB">
-      <feColorMatrix type="matrix"
-        values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 30 -5"/>
-    </filter>` : '';
 
   const silhouetteLayer = pfpData
-    ? `<!-- PFP silhouette: dark fill blocks banner bg, gold outline marks edges -->
+    ? `<!-- PFP silhouette: RGB crushed to dark fill, accent glow outline via blur -->
   <g clip-path="url(#${cp})">
     ${_embeddedPFP(pfpData, fid)}
   </g>`
@@ -169,7 +153,6 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
       <stop offset="100%" stop-color="${p.infoBg}" stop-opacity="0.88"/>
     </linearGradient>
     ${pfpFilterDef}
-    ${patternMaskDef}
   </defs>
 
   <!-- ── CARD SHELL ── -->
@@ -180,17 +163,17 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
         rx="${CARD.irx}" fill="${p.infoBg}"/>
 
   <!-- ── BANNER ── -->
-  <!-- Banner background -->
+  <!-- 1. Banner background fill -->
   <rect x="${CARD.ix}" y="${CARD.iy}" width="${CARD.iw}" height="${CARD.bannerH - CARD.iy}"
         fill="${p.bannerBg}" clip-path="url(#${cp})"/>
 
-  <!-- RD pattern masked to flow AROUND the character outline -->
-  <g clip-path="url(#${cp})" ${pfpData ? `mask="url(#${mid})"` : ''}>
+  <!-- 2. PFP silhouette: dark-crushed image with accent glow outline -->
+  ${silhouetteLayer}
+
+  <!-- 3. RD pattern on top — visible across the full banner -->
+  <g clip-path="url(#${cp})">
     ${rdPattern}
   </g>
-
-  <!-- PFP silhouette on top — dark shape with accent outline -->
-  ${silhouetteLayer}
 
   <!-- Bottom fade into info panel -->
   <rect x="${CARD.ix}" y="${CARD.bannerH - 90}" width="${CARD.iw}" height="90"
@@ -268,30 +251,40 @@ function _embeddedPFPRaw(pfpData) {
  * @param {object} p  Palette
  * @returns {string}  SVG <filter>…</filter> element.
  */
+/**
+ * Build a silhouette filter that works on ALL image types including opaque
+ * JPEGs and WebPs (not just transparent PNGs).
+ *
+ * Approach:
+ *  1. Crush all RGB channels to silhouetteFill (near-black) — creates dark shape.
+ *  2. Blur a copy of the crushed shape outward — spreads into surrounding area.
+ *  3. Flood with silhouetteStroke (accent) and clip to the blurred shape — glow.
+ *  4. Merge: accent glow underneath, sharp dark silhouette on top.
+ *
+ * This works because we operate on the rendered colors, not SourceAlpha,
+ * so opaque photos (alpha=1 everywhere) produce a proper outline.
+ */
 function _silhouetteFilterDef(filterId, p) {
-  // Map PFP to bannerBg (dark) — character blocks pattern; gold outline marks edges
-  const rgb = _hexToRGB01(p.bannerBg);
+  const fill = _hexToRGB01(p.silhouetteFill);
 
   return `
-    <!-- PFP silhouette filter: outline + palette-fill -->
     <filter id="${filterId}" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
-      <!-- 1. Dilate alpha to create outline shape -->
-      <feMorphology in="SourceAlpha" operator="dilate" radius="4" result="dilated"/>
-      <!-- 2. Flood outline color -->
-      <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="0.95" result="outlineFlood"/>
-      <!-- 3. Clip flood to dilated outline -->
-      <feComposite in="outlineFlood" in2="dilated" operator="in" result="outline"/>
-      <!-- 4. Remap source graphic RGB → silhouetteFill, keep alpha -->
+      <!-- 1. Crush RGB to dark silhouette fill, keep alpha -->
       <feColorMatrix in="SourceGraphic" type="matrix"
-        values="0 0 0 0 ${rgb.r.toFixed(4)}
-                0 0 0 0 ${rgb.g.toFixed(4)}
-                0 0 0 0 ${rgb.b.toFixed(4)}
+        values="0 0 0 0 ${fill.r.toFixed(4)}
+                0 0 0 0 ${fill.g.toFixed(4)}
+                0 0 0 0 ${fill.b.toFixed(4)}
                 0 0 0 1 0"
-        result="filled"/>
-      <!-- 5. Layer: outline under filled silhouette -->
+        result="silh"/>
+      <!-- 2. Blur the silhouette outward to create glow region -->
+      <feGaussianBlur in="silh" stdDeviation="7" result="blurred"/>
+      <!-- 3. Flood accent color, clip to blurred glow shape -->
+      <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="0.9" result="accentFlood"/>
+      <feComposite in="accentFlood" in2="blurred" operator="in" result="glow"/>
+      <!-- 4. Merge: accent glow behind sharp dark silhouette -->
       <feMerge>
-        <feMergeNode in="outline"/>
-        <feMergeNode in="filled"/>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="silh"/>
       </feMerge>
     </filter>`;
 }
