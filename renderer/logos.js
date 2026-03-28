@@ -78,23 +78,58 @@ function fingerprintLogo(x, y, size, color = '#eb5b44', uid = '') {
   ].join('\n');
 }
 
+// ─── Lubies "L" logo constants ────────────────────────────────────────────────
+// Source: "Lubies symbol.ai" exported via Inkscape → lubies-l.svg (1.07 MB raw,
+// stripped to 2.8 KB by removing embedded ICC profile).
+// Canvas: 1122.52 × 793.70 — visible logo region confirmed by pixel analysis:
+//   x: 337–786, y: 153–607 → viewBox "337 153 449 454"
+
+const LL_VB = '337 153 449 454';
+
+// Clip A — constrains coral background to its rounded square (Inkscape local-space convention):
+const LL_CLIP_A = 'M-571.633 455.572h841.89v-595.276h-841.89Z';
+
+// Clip B — constrains white mark to badge area:
+const LL_CLIP_B = 'M-135.75 174.99c-9.964 0-18.042-8.076-18.042-18.04l.001-303.381c0-9.964 8.078-18.042 18.041-18.042h303.382c9.964 0 18.041 8.078 18.041 18.042l-.001 303.382c0 9.963-8.076 18.04-18.04 18.04z';
+
+// Coral rounded square (background):
+const LL_BG_PATH = 'M0 0h-300.335c-9.964 0-18.041 8.077-18.041 18.04v300.335c0 9.964 8.077 18.041 18.041 18.041L0 336.417c9.963 0 18.04-8.078 18.04-18.041l.001-300.335C18.041 8.077 9.964 0 0 0';
+
+// White Lubies mark (foreground):
+const LL_MARK_PATH = 'M0 0c-23.35 0-41.835-5.972-53.404-17.929-10.883-11.24-12.179-24.665-8.638-32.98 2.755-6.471 8.212-9.48 16.855-9.573 19.255.068 37.813 17.458 54.061 45.144C12.821-8.613 7.957-.009.16 0zm253.467-119.149c-11.717-7.027-26.875-4.2-35.157 6.667-30.119 39.523-75.376 71.164-134.885 94.243-5.535 2.138-11.795-.298-14.412-5.623-26.169-53.259-63.264-93.33-114.005-93.505h-.31c-31.484 0-57.293 16.494-69.079 44.173-13.305 31.243-5.412 68.467 20.1 94.827C-64.146 52.765-21.985 59.11 17.098 55.849c12.676-1.058 24.34 6.94 27.707 19.206 9.462 34.47 16.21 72.042 19.232 108.294 6.205 74.438 2.92 105.294-1.798 139.727-1.93 14.09 7.438 27.256 21.386 30.041l2.592.518c15.66 3.127 30.277-7.254 32.404-22.594 5.168-37.265 8.801-72.082 2.107-152.414-2.997-35.952-10.584-83.19-24.015-129.342-1.729-5.941 1.413-12.213 7.181-14.454l.094-.037c69.737-27.04 123.389-65.053 159.907-113.225 9.866-13.015 6.185-30.755-7.82-39.154z';
+
 /**
- * Lubies "L" wordmark placeholder.
- * Replace path data below once artist provides the SVG source.
- * Currently renders a styled text fallback.
+ * Renders the artist-original Lubies "L" logo mark as a nested SVG.
+ * Source: Lubies symbol.ai — coral rounded square + white cursive mark.
+ * Always renders in artist brand colors; color param is ignored.
+ *
+ * @param {number} x     top-left x in parent SVG
+ * @param {number} y     top-left y in parent SVG
+ * @param {number} size  width = height (logo is square)
+ * @param {string} _color  ignored — always uses artist brand colors
+ * @param {string} uid   unique suffix for clip-path ids (avoids collisions)
+ * @returns {string} SVG markup
  */
-function lubiesLLogo(x, y, size, color = '#c9a84c', uid = '') {
-  // TODO: replace with artist SVG path once received
-  const fontSize = size * 0.72;
+function lubiesLLogo(x, y, size, _color, uid = '') {
+  const ca = `ll-a-${uid}`;
+  const cb = `ll-b-${uid}`;
   return [
-    `<svg x="${x}" y="${y}" width="${size}" height="${size}" overflow="hidden"`,
-    `     xmlns="http://www.w3.org/2000/svg">`,
-    `  <text x="${size * 0.5}" y="${size * 0.78}"`,
-    `        font-family="'Georgia','Times New Roman',serif"`,
-    `        font-size="${fontSize.toFixed(1)}"`,
-    `        font-weight="bold"`,
-    `        fill="${color}"`,
-    `        text-anchor="middle">L</text>`,
+    `<svg x="${x}" y="${y}" width="${size}" height="${size}"`,
+    `     viewBox="${LL_VB}" overflow="hidden" xmlns="http://www.w3.org/2000/svg">`,
+    `  <defs>`,
+    `    <clipPath id="${ca}" clipPathUnits="userSpaceOnUse">`,
+    `      <path d="${LL_CLIP_A}"/>`,
+    `    </clipPath>`,
+    `    <clipPath id="${cb}" clipPathUnits="userSpaceOnUse">`,
+    `      <path d="${LL_CLIP_B}"/>`,
+    `    </clipPath>`,
+    `  </defs>`,
+    `  <path d="${LL_BG_PATH}" fill="#eb5b44"`,
+    `        clip-path="url(#${ca})"`,
+    `        transform="matrix(1.33333 0 0 -1.33333 762.177 607.429)"/>`,
+    `  <path d="${LL_MARK_PATH}" fill="#ffffff"`,
+    `        clip-path="url(#${cb})"`,
+    `        transform="matrix(1.33333 0 0 -1.33333 539.107 386.656)"/>`,
     `</svg>`,
   ].join('\n');
 }
