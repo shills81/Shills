@@ -112,9 +112,9 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   <!-- PFP — bottom-anchored in banner, dark tint overlay -->
   <g clip-path="url(#${cp})">
     ${_embeddedPFPRaw(pfpData)}
-    <!-- Dark tint over PFP so fingerprint ridges show through -->
+    <!-- Light dark tint so PFP is visible but fingerprint shows through -->
     <rect x="0" y="0" width="${CARD.width}" height="${CARD.bannerH}"
-          fill="${p.bannerBg}" opacity="0.55"/>
+          fill="${p.bannerBg}" opacity="0.25"/>
   </g>`
     : `
   <!-- Placeholder silhouette -->

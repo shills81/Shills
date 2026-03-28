@@ -246,11 +246,11 @@ function writeReport(passes, results) {
     section{margin-bottom:40px}
     h2{font-size:.85rem;letter-spacing:2px;color:#c9a84c;text-transform:uppercase;margin-bottom:14px;
        padding-bottom:6px;border-bottom:1px solid #1f1f2a}
-    .row{display:flex;flex-wrap:wrap;gap:16px}
-    .card{background:#111118;border:1px solid #1e1e2a;border-radius:10px;overflow:hidden;
-          width:180px;flex-shrink:0;transition:transform .15s,border-color .15s}
-    .card:hover{transform:translateY(-2px);border-color:#c9a84c55}
-    .card img{display:block;width:100%;height:auto}
+    .row{display:flex;flex-wrap:wrap;gap:20px}
+    .card{background:#111118;border:1px solid #1e1e2a;border-radius:12px;overflow:hidden;
+          width:224px;flex-shrink:0;transition:transform .15s,border-color .15s}
+    .card:hover{transform:translateY(-3px);border-color:#c9a84c55}
+    .card img{display:block;width:224px;height:305px;object-fit:contain;background:#09090e}
     figcaption{padding:7px 10px 9px;font-size:.68rem;color:#888;line-height:1.4}
     footer{margin-top:48px;font-size:.7rem;color:#333;border-top:1px solid #1a1a22;padding-top:16px}
   </style>
