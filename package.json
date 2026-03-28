@@ -1,0 +1,32 @@
+{
+  "name": "lubies-factory-pass",
+  "version": "1.0.0",
+  "description": "Lubies Factory Pass — ERC721A NFT pass engine with deterministic metadata and SVG rendering",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "qa": "node qa/run.js",
+    "qa:fast": "node qa/run.js --no-contract",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network mainnet",
+    "generate": "node scripts/generateBatch.js",
+    "export": "node scripts/exportBundle.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.1.0",
+    "erc721a": "^4.2.3"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0",
+    "dotenv": "^16.4.5",
+    "merkletreejs": "^0.4.0",
+    "keccak256": "^1.0.6"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.33.5"
+  }
+}
