@@ -97,14 +97,19 @@ function generateTokenImage(tokenId, passData, config = {}, pfpData = null) {
   const paddedId    = String(id).padStart(4, '0');
   const statusColor = _statusColor(traits._status, palette);
 
-  return _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData });
+  // PFP swatches take priority; fall back to palette's static swatchColors
+  const swatches = (pfpData && pfpData.swatches && pfpData.swatches.length >= 3)
+    ? pfpData.swatches
+    : (palette.swatchColors || []);
+
+  return _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData, swatches });
 }
 
 // ---------------------------------------------------------------------------
 // SVG composition
 // ---------------------------------------------------------------------------
 
-function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData }) {
+function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData, swatches }) {
   const p   = palette;
   const cp  = `banner-clip-${id}`;   // banner clip region
   const gid = `banner-fade-${id}`;   // bottom-fade gradient
@@ -198,7 +203,7 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   <!-- ── INFO PANEL ── -->
   ${_infoTitle(p)}
   ${_infoRows(paddedId, traits, p, statusColor)}
-  ${_colorGrid(p)}
+  ${_colorGrid(swatches)}
   ${_logoRow(p, id)}
 
   <!-- ── LANYARD INDICATOR ── -->
@@ -398,28 +403,23 @@ function _infoRows(paddedId, traits, p, statusColor) {
 }
 
 // ---------------------------------------------------------------------------
-// Color code grid — always shown, top-right of info panel (matches reference)
-// Vibrant rainbow 4×2 grid of coloured squares
+// Color swatch strip — single row, right-aligned in the info panel title zone.
+// Shows 3–6 colors extracted from the PFP (or palette defaults for static themes).
 // ---------------------------------------------------------------------------
 
-function _colorGrid(p) {
-  const COLORS = [
-    '#e53935', '#f57c00', '#fdd835', '#43a047',
-    '#1e88e5', '#00acc1', '#8e24aa', '#d81b60',
-  ];
-  const cell  = 24;
-  const gap   = 3;
-  const cols  = 4;
-  const gridW = cols * cell + (cols - 1) * gap;
+function _colorGrid(swatches) {
+  if (!swatches || swatches.length === 0) return '';
+  const n     = Math.max(3, Math.min(6, swatches.length));
+  const cell  = 18;
+  const gap   = 4;
+  const gridW = n * cell + (n - 1) * gap;
   const gridX = CARD.infoRight - gridW;
-  const gridY = CARD.dividerBottom + 10;
-  const pieces = [];
-  COLORS.forEach((color, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    const cx  = gridX + col * (cell + gap);
-    const cy  = gridY + row * (cell + gap);
-    pieces.push(`<rect x="${cx}" y="${cy}" width="${cell}" height="${cell}" rx="3" fill="${color}"/>`);
+  // Vertically centred alongside the "FACTORY / PASS" title block
+  const gridY = CARD.dividerBottom + 43;
+
+  const pieces = swatches.slice(0, n).map((color, i) => {
+    const cx = gridX + i * (cell + gap);
+    return `<rect x="${cx}" y="${gridY}" width="${cell}" height="${cell}" rx="3" fill="${color}"/>`;
   });
   return `<g>${pieces.join('')}</g>`;
 }

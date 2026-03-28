@@ -42,6 +42,7 @@ const PALETTES = {
     silhouetteFill:   '#06090f',
     cardBorder:       '#d4c08866',
     statusColors:     _defaultStatusColors(),
+    swatchColors:     ['#c9a84c', '#d4af37', '#b8943a', '#7c6020'],
   },
 
   /**
@@ -60,6 +61,7 @@ const PALETTES = {
     silhouetteFill:   '#050505',
     cardBorder:       '#cccccc44',
     statusColors:     _defaultStatusColors(),
+    swatchColors:     ['#e2e2e2', '#c8c8c8', '#a0a0a0', '#707070'],
   },
 
   /**
@@ -82,6 +84,7 @@ const PALETTES = {
       ..._defaultStatusColors(),
       ENABLED: '#c084fc',
     },
+    swatchColors:     ['#a855f7', '#7c3aed', '#c084fc', '#e8883a'],
   },
 
   /**
@@ -103,6 +106,7 @@ const PALETTES = {
       ..._defaultStatusColors(),
       ENABLED: '#86efac',
     },
+    swatchColors:     ['#6ee7b7', '#4ade80', '#34d399', '#059669'],
   },
 
   /**
@@ -124,6 +128,7 @@ const PALETTES = {
       ..._defaultStatusColors(),
       ENABLED: '#fda4af',
     },
+    swatchColors:     ['#fb7185', '#f43f5e', '#fda4af', '#e11d48'],
   },
 
   /**
@@ -143,6 +148,7 @@ const PALETTES = {
     silhouetteFill:   '#020202',
     cardBorder:       '#d4d4d433',
     statusColors:     _defaultStatusColors(),
+    swatchColors:     ['#e5e5e5', '#d4d4d4', '#a3a3a3', '#737373'],
   },
 
   /**
@@ -163,6 +169,7 @@ const PALETTES = {
     silhouetteFill:   '#050505',
     cardBorder:       '#b0b0b033',
     statusColors:     _defaultStatusColors(),
+    swatchColors:     [],   // overwritten by PFP extraction at render time
   },
 };
 
@@ -189,6 +196,14 @@ function referenceDerivedPalette(rng) {
   const accent           = hsl(hue, sat + 10, al);
   const infoBg           = hsl(hue, 15, 5);
 
+  // Derive 4 hue-matched swatches spanning light → dark for static fallback
+  const swatchColors = [
+    hsl(hue, sat + 10, al),
+    hsl(hue, sat + 5,  al - 12),
+    hsl(hue, sat,      rl),
+    hsl(hue, sat - 10, rl - 12),
+  ];
+
   return {
     bannerBg,
     ridgeColor,
@@ -202,6 +217,7 @@ function referenceDerivedPalette(rng) {
     silhouetteFill:   hsl(hue, sat, 2),
     cardBorder:       accent + '44',
     statusColors:     _defaultStatusColors(),
+    swatchColors,
   };
 }
 

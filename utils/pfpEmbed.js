@@ -6,10 +6,12 @@
  *
  * Returns a pfpData object used by passRenderer.js to embed the image
  * in the banner zone with a palette-matched silhouette filter applied.
+ * Also extracts 3–6 dominant colors as `swatches` for the color-grid.
  */
 
 const fs   = require('fs');
 const path = require('path');
+const { extractPalette } = require('./colorExtract');
 
 const MIME_TYPES = {
   '.jpg':  'image/jpeg',
@@ -46,12 +48,18 @@ async function loadPFP(imagePath) {
     // sharp not installed or failed — use default dimensions
   }
 
+  // Extract dominant palette swatches (best-effort — falls back to empty)
+  let swatches = [];
+  try { swatches = await extractPalette(buffer, { count: 5 }); }
+  catch { /* non-critical */ }
+
   return {
     dataURI:  `data:${mimeType};base64,${base64}`,
     mimeType,
     width,
     height,
     name,
+    swatches,
   };
 }
 
