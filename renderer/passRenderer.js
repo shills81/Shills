@@ -141,18 +141,23 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   ].join(' ');
 
   const { width: iw, height: ih } = pfpData || {};
-  const fit = pfpData ? _fitPFPInBanner(iw, ih) : null;
+  // Use background-removed subject if available; otherwise use full image
+  const imgData = (pfpData && pfpData.subject) ? pfpData.subject : pfpData;
+  const fit = imgData ? _fitPFPInBanner(imgData.width, imgData.height) : null;
 
-  // Silhouette filter — works on ANY opaque image.
-  // Detects subject via luminance, fills it dark, adds accent outline ring.
+  // Pick filter based on whether subject has a transparent background:
+  //   • subject PNG: use alpha channel directly as the mask (pixel-perfect)
+  //   • original image: fall back to luminance-based detection
   const sid = `silh-${id}`;
-  const silhDef = pfpData ? _silhouetteFilterDef(sid, p) : '';
+  const silhDef = pfpData
+    ? (pfpData.subject ? _alphaBasedSilhouetteFilterDef(sid, p) : _silhouetteFilterDef(sid, p))
+    : '';
 
   const pfpLayer = pfpData
     // ── Dark silhouette of subject shape + accent outline ring
-    ? `<!-- PFP silhouette: dark fill + accent outline, subject from luminance -->
+    ? `<!-- PFP silhouette: dark fill + accent outline -->
   <g clip-path="url(#${cp})">
-    ${_embeddedPFPSilhouette(pfpData, fit, sid)}
+    ${_embeddedPFPSilhouette(imgData, fit, sid)}
   </g>`
     // ── Placeholder silhouette when no PFP supplied
     : `<!-- Placeholder silhouette -->
@@ -295,6 +300,42 @@ function _silhouetteFilterDef(filterId, p) {
       <feFlood flood-color="${p.silhouetteFill}" flood-opacity="1" result="darkFill"/>
       <feComposite in="darkFill" in2="mask" operator="in" result="silhouette"/>
       <!-- 7. Outline ring behind dark silhouette -->
+      <feMerge>
+        <feMergeNode in="outline"/>
+        <feMergeNode in="silhouette"/>
+      </feMerge>
+    </filter>`;
+}
+
+/**
+ * Alpha-based silhouette filter — for background-removed transparent PNGs.
+ *
+ * Uses the PNG's actual alpha channel as the subject mask, giving a
+ * pixel-perfect silhouette without any luminance guesswork.
+ *
+ *   1. Extract subject shape directly from SourceGraphic alpha
+ *   2. Dilate → halo zone for the accent outline ring
+ *   3. Ring = halo minus original alpha → just the border fringe
+ *   4. Dark fill for the subject interior
+ *   5. Merge: accent ring behind dark silhouette
+ */
+function _alphaBasedSilhouetteFilterDef(filterId, p) {
+  return `
+    <filter id="${filterId}" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+      <!-- 1. White flood composite-in gives us a white shape with subject alpha -->
+      <feFlood flood-color="white" result="whiteFill"/>
+      <feComposite in="whiteFill" in2="SourceGraphic" operator="in" result="alphaMask"/>
+      <!-- 2. Dilate the shape → halo zone -->
+      <feMorphology in="alphaMask" operator="dilate" radius="10" result="halo"/>
+      <!-- 3. Ring = halo minus original shape (just the border fringe) -->
+      <feComposite in="halo" in2="alphaMask" operator="arithmetic" k2="1" k3="-1" k4="0" result="ring"/>
+      <!-- 4. Colour the ring with the palette accent -->
+      <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="1" result="accentFill"/>
+      <feComposite in="accentFill" in2="ring" operator="in" result="outline"/>
+      <!-- 5. Dark silhouette fill using the original alpha -->
+      <feFlood flood-color="${p.silhouetteFill}" flood-opacity="1" result="darkFill"/>
+      <feComposite in="darkFill" in2="SourceGraphic" operator="in" result="silhouette"/>
+      <!-- 6. Outline ring behind dark silhouette -->
       <feMerge>
         <feMergeNode in="outline"/>
         <feMergeNode in="silhouette"/>

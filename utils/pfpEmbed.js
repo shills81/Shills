@@ -17,8 +17,8 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { extractPalette }    = require('./colorExtract');
-const { removeBackground }  = require('./removeBackground');
+const { extractPalette }   = require('./colorExtract');
+const { removeBackground } = require('./removeBackground');
 
 const MIME_TYPES = {
   '.jpg':  'image/jpeg',
@@ -61,28 +61,51 @@ function _writeCache(sourcePath, pngBuffer) {
  * @param {string} imagePath
  * @returns {Promise<object>}
  */
+// Max embedded image size — the card banner is only 534×399px so embedding
+// anything larger wastes bytes without any visual benefit.
+const MAX_EMBED_PX = 800;
+
 async function loadPFP(imagePath) {
   const resolved = path.resolve(imagePath);
-  const buffer   = fs.readFileSync(resolved);
-  const base64   = buffer.toString('base64');
-  const ext      = path.extname(resolved).toLowerCase();
-  const mimeType = MIME_TYPES[ext] || 'image/png';
-  const name     = path.basename(resolved, ext);
+  const rawBuffer = fs.readFileSync(resolved);
+  const ext       = path.extname(resolved).toLowerCase();
+  const mimeType  = MIME_TYPES[ext] || 'image/png';
+  const name      = path.basename(resolved, ext);
 
-  let width = 512, height = 512;
+  // Resize to MAX_EMBED_PX before embedding — keeps SVG file sizes sane
+  let buffer = rawBuffer;
+  let width  = 512, height = 512;
   try {
     const sharp = require('sharp');
-    const meta  = await sharp(buffer).metadata();
-    width  = meta.width  || 512;
-    height = meta.height || 512;
-  } catch { /* sharp unavailable */ }
+    const meta  = await sharp(rawBuffer).metadata();
+    const origW = meta.width  || 512;
+    const origH = meta.height || 512;
+    const maxDim = Math.max(origW, origH);
+    if (maxDim > MAX_EMBED_PX) {
+      buffer = await sharp(rawBuffer)
+        .resize(MAX_EMBED_PX, MAX_EMBED_PX, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 88 })
+        .toBuffer();
+      const resized = await sharp(buffer).metadata();
+      width  = resized.width  || origW;
+      height = resized.height || origH;
+    } else {
+      width  = origW;
+      height = origH;
+    }
+  } catch { /* sharp unavailable — use raw */ }
+
+  const base64 = buffer.toString('base64');
 
   // Dominant colour swatches (best-effort)
   let swatches = [];
   try { swatches = await extractPalette(buffer, { count: 5 }); }
   catch { /* non-critical */ }
 
-  // Background removal — uses cache so each image is only billed once
+  // Background removal via remove.bg API (requires REMOVE_BG_API_KEY in .env).
+  // Cached to .cache/rmbg/ so each image is only billed once.
+  // When available, the renderer switches to a pixel-perfect alpha-based
+  // silhouette filter instead of the luminance fallback.
   let subject = null;
   const apiKey = process.env.REMOVE_BG_API_KEY;
   if (apiKey) {
@@ -92,7 +115,7 @@ async function loadPFP(imagePath) {
         subjectBuf = await removeBackground(buffer, apiKey);
         _writeCache(resolved, subjectBuf);
       }
-      // Get subject dimensions
+
       let sw = width, sh = height;
       try {
         const sharp = require('sharp');
@@ -107,7 +130,6 @@ async function loadPFP(imagePath) {
         height:  sh,
       };
     } catch (err) {
-      // Non-fatal: fall back to duotone rendering without outline
       console.warn(`[pfpEmbed] remove.bg failed for ${name}: ${err.message}`);
     }
   }
