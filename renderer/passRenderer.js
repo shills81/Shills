@@ -37,6 +37,7 @@ const { generateRDPattern }  = require('./patterns');
 const { generateTokenTraits } = require('../metadata/traits');
 const { rngForToken }         = require('../utils/hashSeed');
 const { PassStatus }          = require('../metadata/traits');
+const { fingerprintLogo, lubiesLLogo } = require('./logos');
 
 // ---------------------------------------------------------------------------
 // Card geometry constants
@@ -198,7 +199,7 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   ${_infoTitle(p)}
   ${_infoRows(paddedId, traits, p, statusColor)}
   ${_colorGrid(p)}
-  ${_logoRow(p)}
+  ${_logoRow(p, id)}
 
   <!-- ── LANYARD INDICATOR ── -->
   ${traits.lanyard === 'True' ? _lanyardIndicator(p) : ''}
@@ -427,7 +428,7 @@ function _colorGrid(p) {
 // Logo row (bottom of info panel)
 // ---------------------------------------------------------------------------
 
-function _logoRow(p) {
+function _logoRow(p, id) {
   const size = 36;
   const gap  = 8;
   const y    = CARD.height - CARD.brd - 12 - size;  // anchored above frame
@@ -435,67 +436,10 @@ function _logoRow(p) {
   const mx   = lx + size + gap;
 
   return `
-  <!-- Lubies logo mark (artist original — replace path data with SVG source) -->
-  ${_lubiesLogo(lx, y, size, p)}
-  <!-- MFMB fingerprint mark (artist original — replace path data with SVG source) -->
-  ${_mfmbLogo(mx, y, size, p)}`;
-}
-
-// ---------------------------------------------------------------------------
-// Lubies logo mark  (coral rounded square + white script loop)
-// ---------------------------------------------------------------------------
-
-/**
- * SVG approximation of the Lubies logo mark.
- * Coral rounded square with a white script loop-and-tail form.
- *
- * @param {number} x    Top-left x of the bounding square.
- * @param {number} y    Top-left y of the bounding square.
- * @param {number} size Width/height of the bounding square.
- * @param {object} p    Palette (unused — logo always uses brand orange).
- */
-function _lubiesLogo(x, y, size, p) {
-  const s = size / 36;  // scale factor relative to 36px design grid
-
-  // Work in a local 36×36 coordinate space, then transform
-  return `
-  <g transform="translate(${x}, ${y}) scale(${s.toFixed(4)})">
-    <!-- Background: Lubies coral orange -->
-    <rect x="0" y="0" width="36" height="36" rx="6.5" fill="#E05A3A"/>
-    <!-- White script form: loop with enclosed space and lower-right tail -->
-    <path d="M 24,4 C 18,3 10,6 7,13 C 4,20 5,28 10,32 C 15,36 23,36 28,31 C 33,26 33,18 28,13 C 24,9 17,9 14,14 C 11,19 12,26 16,29 C 20,32 26,31 28,26 M 28,26 C 31,29 34,33 35,36"
-          fill="none" stroke="white" stroke-width="5.5"
-          stroke-linecap="round" stroke-linejoin="round"/>
-  </g>`;
-}
-
-// ---------------------------------------------------------------------------
-// MFMB (MyFace MyBrand) fingerprint mark
-// ---------------------------------------------------------------------------
-
-/**
- * SVG approximation of the MFMB/fingerprint logo mark.
- * Rounded square with a miniature RD/fingerprint pattern inside.
- *
- * @param {number} x
- * @param {number} y
- * @param {number} size
- * @param {object} p  Palette — uses accent color for mini ridges.
- */
-function _mfmbLogo(x, y, size, p) {
-  const s = size / 36;
-
-  return `
-  <g transform="translate(${x}, ${y}) scale(${s.toFixed(4)})">
-    <!-- Background: dark (same as card info bg) -->
-    <rect x="0" y="0" width="36" height="36" rx="6.5" fill="${p.infoBg}" stroke="${p.accent}" stroke-width="1.5"/>
-    <!-- Mini fingerprint maze — simplified 3-path approximation -->
-    <g fill="none" stroke="${p.accent}" stroke-width="2" stroke-linecap="round">
-      <path d="M 3,18 C 3,10 10,4 18,4 C 26,4 33,10 33,18 C 33,26 26,32 18,32 C 12,32 7,28 7,22 C 7,16 12,12 18,12 C 22,12 26,15 26,19 C 26,23 23,26 18,26 C 14,26 12,23 12,19 C 12,15 15,13 18,14"/>
-      <path d="M 3,10 C 6,5 12,2 18,2 C 28,2 35,9 35,18"/>
-      <path d="M 3,26 C 5,30 10,34 16,35"/>
-    </g>
-  </g>`;
+  <!-- Lubies "L" mark (placeholder — replace once artist provides SVG source) -->
+  ${lubiesLLogo(lx, y, size, p.accent, `l-${id}`)}
+  <!-- Lubies fingerprint mark — artist original from "Lubies fingerprints.svg" -->
+  ${fingerprintLogo(mx, y, size, '#eb5b44', `fp-${id}`)}`;
 }
 
 // ---------------------------------------------------------------------------

@@ -165,7 +165,7 @@ function suiteSmoke(passes) {
     { name: 'Has RD pattern path', fn: svg => svg.includes('<path d="M ') },
     { name: 'Has FACTORY text',    fn: svg => svg.includes('FACTORY') },
     { name: 'Has divider stripe',  fn: svg => svg.includes('rect') },
-    { name: 'Has Lubies logo',     fn: svg => svg.includes('#E05A3A') },
+    { name: 'Has Lubies logo',     fn: svg => svg.includes('#eb5b44') },
   ];
 
   for (const { file, slug } of passes) {
