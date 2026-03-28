@@ -18,18 +18,23 @@
 const TAU = Math.PI * 2;
 
 /**
- * @param {function} rng      — seeded random, returns [0,1)
- * @param {object}   bounds   — { x, y, w, h } banner rectangle
+ * @param {function} rng        — seeded random, returns [0,1)
+ * @param {object}   bounds     — { x, y, w, h } banner rectangle
  * @param {string}   strokeColor
- * @returns {string}          SVG <g> element containing all ridge paths
+ * @param {object}   [center]   — optional { cx, cy } absolute whorl center; defaults to near-center of bounds
+ * @returns {string}            SVG <g> element containing all ridge paths
  */
-function generateRDPattern(rng, bounds, strokeColor) {
+function generateRDPattern(rng, bounds, strokeColor, center) {
   const { x: bx, y: by, w: bw, h: bh } = bounds;
 
   // ── Whorl center ─────────────────────────────────────────────────────────────
-  // Placed slightly off-center, matching the fingerprint logo's natural feel
-  const cx = bx + bw * (0.42 + rng() * 0.16);   // 42–58% across
-  const cy = by + bh * (0.38 + rng() * 0.24);   // 38–62% down
+  // If caller provides an explicit center (e.g. aligned with PFP subject),
+  // use it with a small random drift for organic feel.
+  // Otherwise default to near-center of the banner.
+  const driftX = bw * (rng() * 0.06 - 0.03);   // ±3% drift
+  const driftY = bh * (rng() * 0.06 - 0.03);
+  const cx = center ? center.cx + driftX : bx + bw * (0.42 + rng() * 0.16);
+  const cy = center ? center.cy + driftY : by + bh * (0.38 + rng() * 0.24);
 
   // Oval aspect ratio: < 1 = horizontally wider, > 1 = vertically taller
   const ar = 0.72 + rng() * 0.36;   // 0.72–1.08

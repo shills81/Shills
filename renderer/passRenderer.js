@@ -99,11 +99,19 @@ function generateTokenImage(tokenId, passData, config = {}, pfpData = null) {
     ? _mostVibrantSwatch(swatches, palette.ridgeColor)
     : palette.ridgeColor;
 
+  // Always ensure the ridge colour has enough contrast against the dark banner.
+  // Boost lightness to a minimum of 55% so rings are always visible.
+  const visibleRidgeColor = _ensureMinLightness(ridgeColor, 0.55);
+
+  // Whorl center aligned with the PFP subject (centre of the banner area)
+  const bannerCenter = { cx: CARD.width / 2, cy: CARD.bannerH / 2 };
+
   const patternRng = rngForToken(tokenId, 'pattern', config.salt);
   const rdPattern  = generateRDPattern(
     patternRng,
     { x: 0, y: 0, w: CARD.width, h: CARD.bannerH },
-    ridgeColor,
+    visibleRidgeColor,
+    bannerCenter,
   );
 
   const paddedId    = String(id).padStart(4, '0');
@@ -171,7 +179,7 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
     <image href="${subject.dataURI}"
            x="${fit ? fit.x : 0}" y="${fit ? fit.y : 0}"
            width="${fit ? fit.w : CARD.iw}" height="${fit ? fit.h : CARD.bannerH}"
-           preserveAspectRatio="xMidYMid slice"
+           preserveAspectRatio="xMidYMid meet"
            filter="url(#${sid})"/>
   </g>`
       // ── Path B: no background removal → duotone only
@@ -209,7 +217,7 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   ${pfpLayer}
 
   <!-- 3. Fingerprint pattern — masked to flow AROUND subject when outline available -->
-  <g clip-path="url(#${cp})" opacity="0.55" ${subject ? `mask="url(#${mid})"` : ''}>
+  <g clip-path="url(#${cp})" opacity="0.72" ${subject ? `mask="url(#${mid})"` : ''}>
     ${rdPattern}
   </g>
 
@@ -276,7 +284,7 @@ function _embeddedPFPRaw(pfpData) {
   const { x, y, w, h } = _fitPFPInBanner(pfpData.width, pfpData.height);
   return `<image href="${pfpData.dataURI}"
          x="${x}" y="${y}" width="${w}" height="${h}"
-         preserveAspectRatio="xMidYMid slice"/>`;
+         preserveAspectRatio="xMidYMid meet"/>`;
 }
 
 /**
@@ -325,7 +333,7 @@ function _subjectImageEl(subject, fit, filterId) {
   const w = fit ? fit.w : 534;
   const h = fit ? fit.h : 412;
   return `<image href="${subject.dataURI}" x="${x}" y="${y}" width="${w}" height="${h}"
-           preserveAspectRatio="xMidYMid slice"
+           preserveAspectRatio="xMidYMid meet"
            filter="url(#${filterId})"/>`;
 }
 
@@ -366,17 +374,21 @@ function _duotoneFilterDef(filterId, p) {
  * @returns {{ x: number, y: number, w: number, h: number }}
  */
 function _fitPFPInBanner(imgW, imgH) {
-  const targetH = CARD.bannerH;
-  const targetW = CARD.width;
+  // Use the inner banner area (inside the card border) as the fit target.
+  // "Contain" (meet) — scale down so the full subject is always visible;
+  // the fingerprint ring pattern fills any empty space around the subject.
+  const targetH = CARD.bannerH - CARD.iy;   // 399 px (inside top border)
+  const targetW = CARD.iw;                   // 534 px (inside side borders)
 
   const scaleH = targetH / imgH;
   const scaleW = targetW / imgW;
-  const scale  = Math.max(scaleH, scaleW);  // cover, not contain
+  const scale  = Math.min(scaleH, scaleW);   // CONTAIN — never crops the subject
 
   const w = imgW * scale;
   const h = imgH * scale;
-  const x = (targetW - w) / 2;
-  const y = (targetH - h) / 2;
+  // Centre horizontally in the full banner, vertically within the inner area
+  const x = (CARD.width - w) / 2;
+  const y = CARD.iy + (targetH - h) / 2;
 
   return { x: +x.toFixed(2), y: +y.toFixed(2), w: +w.toFixed(2), h: +h.toFixed(2) };
 }
@@ -393,7 +405,7 @@ function _embeddedPFP(pfpData, filterId) {
   return `
   <image href="${pfpData.dataURI}"
          x="${x}" y="${y}" width="${w}" height="${h}"
-         preserveAspectRatio="xMidYMid slice"
+         preserveAspectRatio="xMidYMid meet"
          filter="url(#${filterId})"/>`;
 }
 
@@ -427,6 +439,27 @@ function _mostVibrantSwatch(swatches, fallback) {
   return best;
 }
 
+/**
+ * Ensure a hex colour has at least `minL` lightness (HSL).
+ * Brightens the colour without changing hue/saturation.
+ * Returns the original string unchanged if already bright enough or non-hex.
+ */
+function _ensureMinLightness(hex, minL) {
+  if (!hex || !hex.startsWith('#') || hex.length < 7) return hex;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (l >= minL) return hex;
+  // Boost: scale up all channels proportionally so new lightness = minL
+  const scale = minL === 0 ? 1 : minL / Math.max(l, 0.001);
+  const nr = Math.min(1, r * scale);
+  const ng = Math.min(1, g * scale);
+  const nb = Math.min(1, b * scale);
+  return '#' + [nr, ng, nb].map(c => Math.round(c * 255).toString(16).padStart(2, '0')).join('');
+}
+
 function _hexToRGB01(hex) {
   if (!hex || !hex.startsWith('#')) return { r: 0.3, g: 0.3, b: 0.3 };
   let h = hex.slice(1);
@@ -447,64 +480,105 @@ function _hexToRGB01(hex) {
 // ---------------------------------------------------------------------------
 
 function _infoTitle(p) {
-  const y0 = CARD.dividerBottom + 44;
-  const y1 = y0 + 40;
+  const brandY  = CARD.dividerBottom + 26;   // "LUBIES" brand line
+  const titleY0 = CARD.dividerBottom + 52;   // "FACTORY"
+  const titleY1 = titleY0 + 42;             // "PASS"
   return `
-  <text x="${CARD.infoLeft}" y="${y0}"
-        font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
-        font-size="34" font-weight="900" fill="${p.accent}"
-        letter-spacing="3" text-rendering="geometricPrecision">FACTORY</text>
-  <text x="${CARD.infoLeft}" y="${y1}"
-        font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
-        font-size="34" font-weight="900" fill="${p.accent}"
-        letter-spacing="3" text-rendering="geometricPrecision">PASS</text>`;
+  <!-- Brand label -->
+  <text x="${CARD.infoLeft}" y="${brandY}"
+        font-family="'Arial', 'Helvetica Neue', sans-serif"
+        font-size="11" font-weight="700" fill="${p.accentDim}"
+        letter-spacing="5" text-rendering="geometricPrecision">LUBIES</text>
+  <!-- Series title -->
+  <text x="${CARD.infoLeft}" y="${titleY0}"
+        font-family="'Arial Black', 'Impact', 'Helvetica Neue', sans-serif"
+        font-size="36" font-weight="900" fill="${p.accent}"
+        letter-spacing="2" text-rendering="geometricPrecision">FACTORY</text>
+  <text x="${CARD.infoLeft}" y="${titleY1}"
+        font-family="'Arial Black', 'Impact', 'Helvetica Neue', sans-serif"
+        font-size="36" font-weight="900" fill="${p.accent}"
+        letter-spacing="2" text-rendering="geometricPrecision">PASS</text>`;
 }
 
 function _infoRows(paddedId, traits, p, statusColor) {
-  const base = CARD.dividerBottom + 108;
-  const gap  = 46;
+  const base = CARD.dividerBottom + 118;
+  const gap  = 48;
   const rowY = [base, base + gap, base + gap * 2];
 
-  const labelFont = `font-family="'Arial', sans-serif" font-size="15" font-weight="700" fill="${p.text}" letter-spacing="1"`;
-  const valueFont = `font-family="'Arial', sans-serif" font-size="15" font-weight="400" fill="${p.text}" letter-spacing="0"`;
-  const lineColor = `${p.text}22`;
+  const labelFont = `font-family="'Arial', sans-serif" font-size="11" font-weight="700" fill="${p.textMuted}" letter-spacing="3"`;
+  const valueFont = `font-family="'Arial', sans-serif" font-size="16" font-weight="400" fill="${p.text}" letter-spacing="0.5"`;
+  const monoFont  = `font-family="'Courier New', 'Courier', monospace" font-size="16" font-weight="700" fill="${p.text}" letter-spacing="1"`;
+  const lineColor = `${p.text}18`;
+  const labelOff  = 12;   // label sits above the value line
+  const valueOff  = 0;
 
-  function divider(y) {
-    return `<line x1="${CARD.infoLeft}" y1="${y + 14}" x2="${CARD.infoRight}" y2="${y + 14}" stroke="${lineColor}" stroke-width="1"/>`;
+  function row(y, label, valueEl) {
+    return `
+  <text x="${CARD.infoLeft}" y="${y - labelOff}" ${labelFont}>${label}</text>
+  ${valueEl}
+  <line x1="${CARD.infoLeft}" y1="${y + 10}" x2="${CARD.infoRight}" y2="${y + 10}" stroke="${lineColor}" stroke-width="0.75"/>`;
   }
 
+  // Status: coloured dot + text
+  const statusDot = `<circle cx="${CARD.infoLeft + 8}" cy="${rowY[0] - 5}" r="5" fill="${statusColor}"/>
+  <text x="${CARD.infoLeft + 22}" y="${rowY[0]}" ${valueFont}>${traits.status.toUpperCase()}</text>`;
+
   return `
-  <text x="${CARD.infoLeft}" y="${rowY[0]}" ${labelFont}>STATUS :</text>
-  <text x="${CARD.infoLeft + 110}" y="${rowY[0]}" ${valueFont}>${traits.status.toUpperCase()}</text>
-  ${divider(rowY[0])}
-
-  <text x="${CARD.infoLeft}" y="${rowY[1]}" ${labelFont}>TOKEN :</text>
-  <text x="${CARD.infoLeft + 110}" y="${rowY[1]}" ${valueFont}># ${paddedId}</text>
-  ${divider(rowY[1])}
-
-  <text x="${CARD.infoLeft}" y="${rowY[2]}" ${labelFont}>ID N° :</text>
-  <text x="${CARD.infoLeft + 110}" y="${rowY[2]}" ${valueFont}>${traits.edition || paddedId}</text>`;
+  ${row(rowY[0], 'STATUS', statusDot)}
+  ${row(rowY[1], 'TOKEN', `<text x="${CARD.infoLeft}" y="${rowY[1]}" ${monoFont}># ${paddedId}</text>`)}
+  ${row(rowY[2], 'EDITION', `<text x="${CARD.infoLeft}" y="${rowY[2]}" ${monoFont}>${traits.edition || paddedId}</text>`)}`;
 }
 
 // ---------------------------------------------------------------------------
-// Color swatch strip — single row, right-aligned in the info panel title zone.
-// Shows 3–6 colors extracted from the PFP (or palette defaults for static themes).
+// Color swatch pyramid — right-aligned in the info panel title zone.
+// Up to 10 colours arranged in a stacked pyramid:
+//   3 colours → [3]
+//   4         → [2, 2]
+//   5         → [3, 2]
+//   6         → [3, 2, 1]
+//   7         → [3, 2, 2]
+//   8         → [3, 3, 2]
+//   9         → [3, 3, 3]
+//  10         → [4, 3, 3]
 // ---------------------------------------------------------------------------
+
+const _PYRAMID_ROWS = {
+  1: [1], 2: [2], 3: [3],
+  4: [2, 2], 5: [3, 2], 6: [3, 2, 1],
+  7: [3, 2, 2], 8: [3, 3, 2], 9: [3, 3, 3], 10: [4, 3, 3],
+};
 
 function _colorGrid(swatches) {
   if (!swatches || swatches.length === 0) return '';
-  const n     = Math.max(3, Math.min(6, swatches.length));
-  const cell  = 18;
-  const gap   = 4;
-  const gridW = n * cell + (n - 1) * gap;
-  const gridX = CARD.infoRight - gridW;
-  // Vertically centred alongside the "FACTORY / PASS" title block
-  const gridY = CARD.dividerBottom + 43;
+  const n    = Math.min(10, Math.max(1, swatches.length));
+  const rows = _PYRAMID_ROWS[n] || [3, 3, 3];
 
-  const pieces = swatches.slice(0, n).map((color, i) => {
-    const cx = gridX + i * (cell + gap);
-    return `<rect x="${cx}" y="${gridY}" width="${cell}" height="${cell}" rx="3" fill="${color}"/>`;
+  const cell = 16;   // swatch cell size (px)
+  const gap  = 4;    // gap between cells
+
+  // Max row width sets the right-edge alignment anchor
+  const maxRowCells = Math.max(...rows);
+  const maxRowW     = maxRowCells * cell + (maxRowCells - 1) * gap;
+
+  // Top of the pyramid: aligned alongside the brand line
+  const gridTop  = CARD.dividerBottom + 18;
+  const gridRight = CARD.infoRight;
+
+  const pieces = [];
+  let swatchIdx = 0;
+
+  rows.forEach((rowCount, rowIdx) => {
+    const rowW = rowCount * cell + (rowCount - 1) * gap;
+    const rowX = gridRight - rowW;   // right-align each row
+    const rowY = gridTop + rowIdx * (cell + gap);
+    for (let i = 0; i < rowCount; i++) {
+      if (swatchIdx >= n) break;
+      const rx = rowX + i * (cell + gap);
+      pieces.push(`<rect x="${rx}" y="${rowY}" width="${cell}" height="${cell}" rx="3" fill="${swatches[swatchIdx]}"/>`);
+      swatchIdx++;
+    }
   });
+
   return `<g>${pieces.join('')}</g>`;
 }
 
