@@ -87,20 +87,27 @@ function generateTokenImage(tokenId, passData, config = {}, pfpData = null) {
   const paletteRng = rngForToken(tokenId, 'palette', config.salt);
   const palette    = resolvePalette(traits.paletteMode, paletteRng);
 
+  // PFP swatches take priority over palette defaults
+  const swatches = (pfpData && pfpData.swatches && pfpData.swatches.length >= 3)
+    ? pfpData.swatches
+    : (palette.swatchColors || []);
+
+  // Ridge colour: pick the most vibrant swatch from the PFP, or fall back to
+  // the palette's ridgeColor.  This makes every pass's pattern uniquely coloured
+  // by its source image.
+  const ridgeColor = swatches.length > 0
+    ? _mostVibrantSwatch(swatches, palette.ridgeColor)
+    : palette.ridgeColor;
+
   const patternRng = rngForToken(tokenId, 'pattern', config.salt);
   const rdPattern  = generateRDPattern(
     patternRng,
     { x: 0, y: 0, w: CARD.width, h: CARD.bannerH },
-    palette.ridgeColor,
+    ridgeColor,
   );
 
   const paddedId    = String(id).padStart(4, '0');
   const statusColor = _statusColor(traits._status, palette);
-
-  // PFP swatches take priority; fall back to palette's static swatchColors
-  const swatches = (pfpData && pfpData.swatches && pfpData.swatches.length >= 3)
-    ? pfpData.swatches
-    : (palette.swatchColors || []);
 
   return _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData, swatches });
 }
@@ -129,15 +136,19 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   const { width: iw, height: ih } = pfpData || {};
   const fit = pfpData ? _fitPFPInBanner(iw, ih) : null;
 
-  // Silhouette filter works on ALL image types (opaque JPEG/WebP/PNG).
-  // Uses a blur-glow approach instead of SourceAlpha so it doesn't need
-  // image transparency to produce an accent outline.
-  const pfpFilterDef = pfpData ? _silhouetteFilterDef(fid, p) : '';
+  // Accent-tint filter: slight colour-grade toward the palette accent so the
+  // photo feels part of the card without losing recognisability.
+  const pfpFilterDef = pfpData ? _pfpTintFilterDef(fid, p) : '';
 
-  const silhouetteLayer = pfpData
-    ? `<!-- PFP silhouette: RGB crushed to dark fill, accent glow outline via blur -->
+  const pfpLayer = pfpData
+    ? `<!-- PFP: full-colour photo, accent-tinted, subject clearly visible -->
   <g clip-path="url(#${cp})">
-    ${_embeddedPFP(pfpData, fid)}
+    ${_embeddedPFPRaw(pfpData)}
+  </g>
+  <!-- Accent tint overlay — subtle colour-grade toward palette -->
+  <g clip-path="url(#${cp})">
+    <rect x="${CARD.ix}" y="${CARD.iy}" width="${CARD.iw}" height="${CARD.bannerH - CARD.iy}"
+          fill="${p.accent}" opacity="0.10"/>
   </g>`
     : `<!-- Placeholder silhouette -->
   <g clip-path="url(#${cp})">
@@ -156,22 +167,20 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   </defs>
 
   <!-- ── CARD SHELL ── -->
-  <!-- Cream/tan frame (the physical badge border) -->
   <rect width="${CARD.width}" height="${CARD.height}" rx="${CARD.rx}" fill="${CARD.brdColor}"/>
-  <!-- Dark inner content area -->
   <rect x="${CARD.ix}" y="${CARD.iy}" width="${CARD.iw}" height="${CARD.ih}"
         rx="${CARD.irx}" fill="${p.infoBg}"/>
 
   <!-- ── BANNER ── -->
-  <!-- 1. Banner background fill -->
+  <!-- 1. Dark banner base -->
   <rect x="${CARD.ix}" y="${CARD.iy}" width="${CARD.iw}" height="${CARD.bannerH - CARD.iy}"
         fill="${p.bannerBg}" clip-path="url(#${cp})"/>
 
-  <!-- 2. PFP silhouette: dark-crushed image with accent glow outline -->
-  ${silhouetteLayer}
+  <!-- 2. Full-colour PFP — subject is unmistakably visible -->
+  ${pfpLayer}
 
-  <!-- 3. RD pattern on top — visible across the full banner -->
-  <g clip-path="url(#${cp})">
+  <!-- 3. Fingerprint pattern at reduced opacity — wraps over the subject -->
+  <g clip-path="url(#${cp})" opacity="0.38">
     ${rdPattern}
   </g>
 
@@ -252,47 +261,13 @@ function _embeddedPFPRaw(pfpData) {
  * @returns {string}  SVG <filter>…</filter> element.
  */
 /**
- * Build a silhouette filter that works on ALL image types including opaque
- * JPEGs and WebPs (not just transparent PNGs).
- *
- * Approach:
- *  1. Crush all RGB to silhouetteFill (near-black) — the dark silhouette shape.
- *  2. Edge-detect on the ORIGINAL image via blur-difference — gives bright pixels
- *     wherever colors change (character outline + features). This works for opaque
- *     photos because we're comparing original vs blurred original, not using alpha.
- *  3. Map edge brightness → accent stroke color with alpha from edge intensity.
- *  4. Merge: dark silhouette base + accent-coloured edge lines on top.
+ * Accent tint filter — reserved for future stylised effects.
+ * Currently unused for the PFP layer (photo is shown raw), kept for
+ * the placeholder silhouette path.
  */
-function _silhouetteFilterDef(filterId, p) {
-  const fill   = _hexToRGB01(p.silhouetteFill);
-  const stroke = _hexToRGB01(p.silhouetteStroke);
-
-  return `
-    <filter id="${filterId}" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
-      <!-- 1. Dark silhouette: crush all RGB to near-black fill -->
-      <feColorMatrix in="SourceGraphic" type="matrix"
-        values="0 0 0 0 ${fill.r.toFixed(3)}
-                0 0 0 0 ${fill.g.toFixed(3)}
-                0 0 0 0 ${fill.b.toFixed(3)}
-                0 0 0 1 0"
-        result="silh"/>
-      <!-- 2. Edge detection: blur the original, take absolute difference -->
-      <!--    feBlend "difference" = |src - blurred| → bright at colour boundaries -->
-      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="srcBlur"/>
-      <feBlend in="SourceGraphic" in2="srcBlur" mode="difference" result="edges"/>
-      <!-- 3. Map edge intensity → accent colour, alpha driven by edge strength -->
-      <feColorMatrix in="edges" type="matrix"
-        values="0 0 0 0 ${stroke.r.toFixed(3)}
-                0 0 0 0 ${stroke.g.toFixed(3)}
-                0 0 0 0 ${stroke.b.toFixed(3)}
-                7 7 7 0 -0.15"
-        result="accentEdges"/>
-      <!-- 4. Dark silhouette base + accent edge lines on top -->
-      <feMerge>
-        <feMergeNode in="silh"/>
-        <feMergeNode in="accentEdges"/>
-      </feMerge>
-    </filter>`;
+function _pfpTintFilterDef(filterId, p) {   // eslint-disable-line no-unused-vars
+  void filterId; void p;
+  return '';
 }
 
 /**
@@ -342,6 +317,29 @@ function _embeddedPFP(pfpData, filterId) {
  * @param {string} hex
  * @returns {{ r: number, g: number, b: number }}
  */
+/**
+ * From an array of #rrggbb swatches, return the one with the highest
+ * perceptual vibrancy (saturation × mid-lightness score).
+ * Falls back to `fallback` if no hex swatch can be parsed.
+ */
+function _mostVibrantSwatch(swatches, fallback) {
+  let best = fallback;
+  let bestScore = -1;
+  for (const hex of swatches) {
+    if (!hex || !hex.startsWith('#') || hex.length < 7) continue;
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const l   = (max + min) / 2;
+    const s   = max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1));
+    // Prefer high saturation, penalise very dark (l<0.2) or washed-out (l>0.85)
+    const score = s * (1 - Math.abs(l - 0.5) * 1.4);
+    if (score > bestScore) { bestScore = score; best = hex; }
+  }
+  return best;
+}
+
 function _hexToRGB01(hex) {
   if (!hex || !hex.startsWith('#')) return { r: 0.3, g: 0.3, b: 0.3 };
   let h = hex.slice(1);
