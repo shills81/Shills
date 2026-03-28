@@ -136,19 +136,15 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   const { width: iw, height: ih } = pfpData || {};
   const fit = pfpData ? _fitPFPInBanner(iw, ih) : null;
 
-  // Accent-tint filter: slight colour-grade toward the palette accent so the
-  // photo feels part of the card without losing recognisability.
-  const pfpFilterDef = pfpData ? _pfpTintFilterDef(fid, p) : '';
+  // Duotone filter: desaturates the photo then maps darks → bannerBg and
+  // lights → accent.  Keeps the subject unmistakably recognisable while
+  // integrating the image into the card's colour palette.
+  const pfpFilterDef = pfpData ? _duotoneFilterDef(fid, p) : '';
 
   const pfpLayer = pfpData
-    ? `<!-- PFP: full-colour photo, accent-tinted, subject clearly visible -->
+    ? `<!-- PFP: duotone-filtered so subject is clear and palette-matched -->
   <g clip-path="url(#${cp})">
-    ${_embeddedPFPRaw(pfpData)}
-  </g>
-  <!-- Accent tint overlay — subtle colour-grade toward palette -->
-  <g clip-path="url(#${cp})">
-    <rect x="${CARD.ix}" y="${CARD.iy}" width="${CARD.iw}" height="${CARD.bannerH - CARD.iy}"
-          fill="${p.accent}" opacity="0.10"/>
+    ${_embeddedPFP(pfpData, fid)}
   </g>`
     : `<!-- Placeholder silhouette -->
   <g clip-path="url(#${cp})">
@@ -179,8 +175,8 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   <!-- 2. Full-colour PFP — subject is unmistakably visible -->
   ${pfpLayer}
 
-  <!-- 3. Fingerprint pattern at reduced opacity — wraps over the subject -->
-  <g clip-path="url(#${cp})" opacity="0.38">
+  <!-- 3. Fingerprint pattern on top — wraps over the duotone subject -->
+  <g clip-path="url(#${cp})" opacity="0.45">
     ${rdPattern}
   </g>
 
@@ -261,13 +257,31 @@ function _embeddedPFPRaw(pfpData) {
  * @returns {string}  SVG <filter>…</filter> element.
  */
 /**
- * Accent tint filter — reserved for future stylised effects.
- * Currently unused for the PFP layer (photo is shown raw), kept for
- * the placeholder silhouette path.
+ * Duotone filter — maps the photo to two palette colours.
+ * Darks → silhouetteFill (near-black), lights → accent.
+ * The subject stays unmistakably recognisable; the image integrates
+ * into the card colour palette like a designed event poster.
  */
-function _pfpTintFilterDef(filterId, p) {   // eslint-disable-line no-unused-vars
-  void filterId; void p;
-  return '';
+function _duotoneFilterDef(filterId, p) {
+  const dark = _hexToRGB01(p.silhouetteFill);
+  const lite = _hexToRGB01(p.accent);
+
+  // tableValues maps [0 → dark, 1 → lite] for each channel
+  const rVals = `${dark.r.toFixed(3)} ${lite.r.toFixed(3)}`;
+  const gVals = `${dark.g.toFixed(3)} ${lite.g.toFixed(3)}`;
+  const bVals = `${dark.b.toFixed(3)} ${lite.b.toFixed(3)}`;
+
+  return `
+    <filter id="${filterId}" color-interpolation-filters="sRGB">
+      <!-- 1. Desaturate to luminance grayscale -->
+      <feColorMatrix type="saturate" values="0" result="gray"/>
+      <!-- 2. Remap grayscale → duotone (dark=silhouetteFill, light=accent) -->
+      <feComponentTransfer in="gray">
+        <feFuncR type="table" tableValues="${rVals}"/>
+        <feFuncG type="table" tableValues="${gVals}"/>
+        <feFuncB type="table" tableValues="${bVals}"/>
+      </feComponentTransfer>
+    </filter>`;
 }
 
 /**
