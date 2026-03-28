@@ -276,18 +276,25 @@ function _embeddedPFPSilhouette(pfpData, fit, filterId) {
  */
 function _silhouetteFilterDef(filterId, p) {
   return `
-    <filter id="${filterId}" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
-      <!-- 1. Convert image brightness → subject alpha mask -->
-      <feColorMatrix type="luminanceToAlpha" result="luma"/>
-      <!-- 2. Outline ring: dilate → subtract original → border only -->
-      <feMorphology in="luma" operator="dilate" radius="8" result="halo"/>
-      <feComposite in="halo" in2="luma" operator="arithmetic" k2="1" k3="-1" k4="0" result="ring"/>
+    <filter id="${filterId}" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+      <!-- 1. Pre-blur smooths jagged edges and merges nearby bright regions -->
+      <feGaussianBlur stdDeviation="5" result="blurred"/>
+      <!-- 2. Luminance → alpha: bright pixels become the subject mask -->
+      <feColorMatrix in="blurred" type="luminanceToAlpha" result="luma"/>
+      <!-- 3. Sharpen threshold: mid-darks → zero, mid-brights → opaque -->
+      <feComponentTransfer in="luma" result="mask">
+        <feFuncA type="linear" slope="3" intercept="-0.55"/>
+      </feComponentTransfer>
+      <!-- 4. Dilate the mask → outline halo zone -->
+      <feMorphology in="mask" operator="dilate" radius="10" result="halo"/>
+      <!-- 5. Ring = halo minus original mask (just the border fringe) -->
+      <feComposite in="halo" in2="mask" operator="arithmetic" k2="1" k3="-1" k4="0" result="ring"/>
       <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="1" result="accentFill"/>
       <feComposite in="accentFill" in2="ring" operator="in" result="outline"/>
-      <!-- 3. Dark fill for the subject shape -->
+      <!-- 6. Dark silhouette fill -->
       <feFlood flood-color="${p.silhouetteFill}" flood-opacity="1" result="darkFill"/>
-      <feComposite in="darkFill" in2="luma" operator="in" result="silhouette"/>
-      <!-- 4. Compose: outline ring behind the dark silhouette -->
+      <feComposite in="darkFill" in2="mask" operator="in" result="silhouette"/>
+      <!-- 7. Outline ring behind dark silhouette -->
       <feMerge>
         <feMergeNode in="outline"/>
         <feMergeNode in="silhouette"/>
