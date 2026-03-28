@@ -100,21 +100,20 @@ function generateTokenImage(tokenId, passData, config = {}, pfpData = null) {
 function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData }) {
   const p    = palette;
   const cp   = `banner-clip-${id}`;
-  const gid  = `banner-fade-${id}`;   // gradient id for bottom fade
+  const gid  = `banner-fade-${id}`;
+  const fid  = `pfp-filter-${id}`;
+  const pfpDefs = pfpData ? _silhouetteFilterDef(fid, p) : '';
 
   // Layer order (matches reference passes):
   //   1. Dark banner background
-  //   2. RD fingerprint pattern (full opacity, thin ridges)
-  //   3. PFP — positioned lower half of banner, dark silhouette style
+  //   2. RD fingerprint pattern — full opacity background texture
+  //   3. PFP silhouette — character shape mapped to ridgeColor, on top of pattern
   //   4. Bottom fade into info panel
   const pfpLayer = pfpData
     ? `
-  <!-- PFP — bottom-anchored in banner, dark tint overlay -->
-  <g clip-path="url(#${cp})">
-    ${_embeddedPFPRaw(pfpData)}
-    <!-- Light dark tint so PFP is visible but fingerprint shows through -->
-    <rect x="0" y="0" width="${CARD.width}" height="${CARD.bannerH}"
-          fill="${p.bannerBg}" opacity="0.25"/>
+  <!-- PFP silhouette — character shape in accent/ridge color over pattern -->
+  <g clip-path="url(#${cp})" opacity="0.82">
+    ${_embeddedPFP(pfpData, fid)}
   </g>`
     : `
   <!-- Placeholder silhouette -->
@@ -125,12 +124,13 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   const bannerLayers = `
   <!-- 1. Banner background -->
   <rect x="0" y="0" width="${CARD.width}" height="${CARD.bannerH}" fill="${p.bannerBg}" clip-path="url(#${cp})"/>
-  ${pfpLayer}
-  <!-- 2. RD fingerprint pattern — always on top -->
-  <g clip-path="url(#${cp})" opacity="${pfpData ? '0.7' : '1.0'}">
+  <!-- 2. RD fingerprint pattern — full opacity, fills banner -->
+  <g clip-path="url(#${cp})">
     ${rdPattern}
   </g>
-  <!-- 3. Bottom fade into info panel -->
+  <!-- 3. PFP silhouette on top of pattern -->
+  ${pfpLayer}
+  <!-- 4. Bottom fade into info panel -->
   <rect x="0" y="${CARD.bannerH - 100}" width="${CARD.width}" height="100"
         fill="url(#${gid})" clip-path="url(#${cp})"/>`;
 
@@ -146,6 +146,7 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
       <stop offset="0%" stop-color="${p.infoBg}" stop-opacity="0"/>
       <stop offset="100%" stop-color="${p.infoBg}" stop-opacity="0.92"/>
     </linearGradient>
+    ${pfpDefs}
   </defs>
 
   <!-- 1. Card base fill -->
@@ -237,8 +238,8 @@ function _embeddedPFPRaw(pfpData) {
  * @returns {string}  SVG <filter>…</filter> element.
  */
 function _silhouetteFilterDef(filterId, p) {
-  // Parse silhouetteFill into r/g/b [0–1] for feColorMatrix
-  const rgb = _hexToRGB01(p.silhouetteFill);
+  // Map PFP to ridgeColor (accent) — character glows in palette accent over fingerprint
+  const rgb = _hexToRGB01(p.ridgeColor);
 
   return `
     <!-- PFP silhouette filter: outline + palette-fill -->
