@@ -2,11 +2,13 @@
 
 /**
  * patterns.js
- * Reaction-diffusion fingerprint pattern — tight ridge version.
+ * Fingerprint whorl pattern — concentric oval ridges radiating from a center.
  *
- * Traces iso-potential contour lines of a composite sine field.
- * Thin strokes (2-3px), high frequency, dense seeding → produces
- * the tight winding fingerprint maze seen in the reference passes.
+ * Generates streamlines that follow the iso-contours of:
+ *   φ(x,y) = √((x−cx)² + (y−cy)²·ar²) + organic_perturbation(x,y)
+ *
+ * Iso-contours are concentric ovals with organic wobble, matching the
+ * Lubies fingerprint logo aesthetic: tight ridges, flowing curves, single origin.
  */
 
 const TAU = Math.PI * 2;
@@ -14,29 +16,33 @@ const TAU = Math.PI * 2;
 function generateRDPattern(rng, bounds, strokeColor) {
   const { x: bx, y: by, w: bw, h: bh } = bounds;
 
-  // ── Scalar field — higher frequency than before for tighter ridges ──
-  const scales = [
-    0.038 + rng() * 0.018,   // s0x
-    0.030 + rng() * 0.016,   // s0y
-    0.048 + rng() * 0.020,   // s1x
-    0.028 + rng() * 0.014,   // s1y
-    0.060 + rng() * 0.020,   // s2x
-    0.040 + rng() * 0.016,   // s2y
-    0.022 + rng() * 0.012,   // s3x  (extra term for complexity)
-    0.052 + rng() * 0.018,   // s3y
-  ];
-  const phases  = Array.from({ length: 8 }, () => rng() * TAU);
-  const weights = [1.0, 0.80, 0.55, 0.35];
+  // ── Whorl center: randomised in the inner band of the banner ──
+  const cx = bx + bw * (0.38 + rng() * 0.24);   // 38–62% across
+  const cy = by + bh * (0.28 + rng() * 0.38);   // 28–66% down
 
+  // Oval aspect ratio (< 1 = horizontally stretched, > 1 = vertically stretched)
+  const ar = 0.70 + rng() * 0.50;
+
+  // Organic perturbation — gives the fingerprint its natural, non-mechanical look
+  const f1  = 0.020 + rng() * 0.016;
+  const f2  = 0.014 + rng() * 0.012;
+  const f3  = 0.032 + rng() * 0.014;
+  const ph  = Array.from({ length: 6 }, () => rng() * TAU);
+  const amp = 16 + rng() * 24;   // pixel amplitude of ridge wobble
+
+  // ── Scalar potential: radial distance + multi-frequency distortion ──
   function potential(px, py) {
-    return weights[0] * Math.sin(px * scales[0] + py * scales[1] + phases[0])
-         + weights[1] * Math.sin(px * scales[2] - py * scales[3] + phases[1])
-         + weights[2] * Math.sin(px * scales[4] + py * scales[5] + phases[2])
-         + weights[3] * Math.cos(px * scales[6] + py * scales[7] + phases[3])
-         + weights[3] * Math.sin(px * scales[1] - py * scales[0] + phases[4]);
+    const dx = px - cx;
+    const dy = (py - cy) * ar;
+    const r  = Math.sqrt(dx * dx + dy * dy);
+    return r
+      + amp        * Math.sin(px * f1  + py * f2  + ph[0])
+      + amp * 0.55 * Math.sin(-px * f2 + py * f1  + ph[1])
+      + amp * 0.35 * Math.cos(px * f3  - py * f2  + ph[2])
+      + amp * 0.22 * Math.sin(px * f2  + py * f3  + ph[3]);
   }
 
-  // Flow = gradient of φ rotated 90° → traces contour lines
+  // ── Flow = gradient of φ rotated 90° → traces iso-contour lines ──
   const fd = 1.0;
   function flowAngle(px, py) {
     const dpx = (potential(px + fd, py) - potential(px - fd, py)) / (2 * fd);
@@ -44,16 +50,14 @@ function generateRDPattern(rng, bounds, strokeColor) {
     return Math.atan2(dpx, -dpy);
   }
 
-  // ── Tight spacing, thin strokes ──
-  const spacing  = 11 + rng() * 5;        // tighter ridge spacing (11–16px)
-  const sw       = (2.2 + rng() * 1.0).toFixed(1);  // thin stroke (2.2–3.2px)
-  const stepLen  = 3.0;                    // smaller integration step
-  const maxSteps = Math.ceil((bw + bh) * 1.6 / stepLen);
+  // ── Stroke style: thin, tightly spaced ──
+  const spacing  = 9 + rng() * 5;                        // 9–14 px between ridges
+  const sw       = (1.4 + rng() * 0.9).toFixed(1);       // 1.4–2.3 px stroke
+  const stepLen  = 2.5;
+  const maxSteps = Math.ceil((bw + bh) * 2.0 / stepLen);
 
-  // ── Dense seed grid: edges + full interior ──
+  // ── Seeds: edges + interior grid ──
   const seeds = [];
-
-  // All four edges
   for (let sy = by; sy <= by + bh; sy += spacing) {
     seeds.push([bx, sy]);
     seeds.push([bx + bw, sy]);
@@ -62,32 +66,29 @@ function generateRDPattern(rng, bounds, strokeColor) {
     seeds.push([sx, by]);
     seeds.push([sx, by + bh]);
   }
-  // Full interior grid (denser than before)
-  for (let sy = by + spacing; sy < by + bh; sy += spacing * 2) {
-    for (let sx = bx + spacing; sx < bx + bw; sx += spacing * 2) {
+  for (let sy = by + spacing; sy < by + bh; sy += spacing * 1.8) {
+    for (let sx = bx + spacing; sx < bx + bw; sx += spacing * 1.8) {
       seeds.push([sx, sy]);
     }
   }
 
   // ── Trace paths ──
   const pathData = [];
-
   for (const [sx, sy] of seeds) {
     const pts = [[sx, sy]];
-    let px = sx;
-    let py = sy;
+    let px = sx, py = sy;
 
     for (let s = 0; s < maxSteps; s++) {
       const a = flowAngle(px, py);
       px += Math.cos(a) * stepLen;
       py += Math.sin(a) * stepLen;
-      if (px < bx - 8 || px > bx + bw + 8 || py < by - 8 || py > by + bh + 8) break;
+      if (px < bx - 10 || px > bx + bw + 10 || py < by - 10 || py > by + bh + 10) break;
       pts.push([px, py]);
     }
 
     if (pts.length < 4) continue;
 
-    // Smooth path via quadratic bezier through midpoints
+    // Smooth via quadratic bezier through midpoints
     let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
     for (let i = 0; i < pts.length - 2; i++) {
       const cpx = pts[i + 1][0].toFixed(1);

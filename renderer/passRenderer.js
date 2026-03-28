@@ -256,35 +256,41 @@ function _embeddedPFPRaw(pfpData) {
  * JPEGs and WebPs (not just transparent PNGs).
  *
  * Approach:
- *  1. Crush all RGB channels to silhouetteFill (near-black) — creates dark shape.
- *  2. Blur a copy of the crushed shape outward — spreads into surrounding area.
- *  3. Flood with silhouetteStroke (accent) and clip to the blurred shape — glow.
- *  4. Merge: accent glow underneath, sharp dark silhouette on top.
- *
- * This works because we operate on the rendered colors, not SourceAlpha,
- * so opaque photos (alpha=1 everywhere) produce a proper outline.
+ *  1. Crush all RGB to silhouetteFill (near-black) — the dark silhouette shape.
+ *  2. Edge-detect on the ORIGINAL image via blur-difference — gives bright pixels
+ *     wherever colors change (character outline + features). This works for opaque
+ *     photos because we're comparing original vs blurred original, not using alpha.
+ *  3. Map edge brightness → accent stroke color with alpha from edge intensity.
+ *  4. Merge: dark silhouette base + accent-coloured edge lines on top.
  */
 function _silhouetteFilterDef(filterId, p) {
-  const fill = _hexToRGB01(p.silhouetteFill);
+  const fill   = _hexToRGB01(p.silhouetteFill);
+  const stroke = _hexToRGB01(p.silhouetteStroke);
 
   return `
-    <filter id="${filterId}" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
-      <!-- 1. Crush RGB to dark silhouette fill, keep alpha -->
+    <filter id="${filterId}" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+      <!-- 1. Dark silhouette: crush all RGB to near-black fill -->
       <feColorMatrix in="SourceGraphic" type="matrix"
-        values="0 0 0 0 ${fill.r.toFixed(4)}
-                0 0 0 0 ${fill.g.toFixed(4)}
-                0 0 0 0 ${fill.b.toFixed(4)}
+        values="0 0 0 0 ${fill.r.toFixed(3)}
+                0 0 0 0 ${fill.g.toFixed(3)}
+                0 0 0 0 ${fill.b.toFixed(3)}
                 0 0 0 1 0"
         result="silh"/>
-      <!-- 2. Blur the silhouette outward to create glow region -->
-      <feGaussianBlur in="silh" stdDeviation="7" result="blurred"/>
-      <!-- 3. Flood accent color, clip to blurred glow shape -->
-      <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="0.9" result="accentFlood"/>
-      <feComposite in="accentFlood" in2="blurred" operator="in" result="glow"/>
-      <!-- 4. Merge: accent glow behind sharp dark silhouette -->
+      <!-- 2. Edge detection: blur the original, take absolute difference -->
+      <!--    feBlend "difference" = |src - blurred| → bright at colour boundaries -->
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="srcBlur"/>
+      <feBlend in="SourceGraphic" in2="srcBlur" mode="difference" result="edges"/>
+      <!-- 3. Map edge intensity → accent colour, alpha driven by edge strength -->
+      <feColorMatrix in="edges" type="matrix"
+        values="0 0 0 0 ${stroke.r.toFixed(3)}
+                0 0 0 0 ${stroke.g.toFixed(3)}
+                0 0 0 0 ${stroke.b.toFixed(3)}
+                7 7 7 0 -0.15"
+        result="accentEdges"/>
+      <!-- 4. Dark silhouette base + accent edge lines on top -->
       <feMerge>
-        <feMergeNode in="glow"/>
         <feMergeNode in="silh"/>
+        <feMergeNode in="accentEdges"/>
       </feMerge>
     </filter>`;
 }
