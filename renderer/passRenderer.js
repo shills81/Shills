@@ -431,15 +431,17 @@ function _colorGrid(p) {
 function _logoRow(p, id) {
   const size = 36;
   const gap  = 8;
-  const y    = CARD.height - CARD.brd - 12 - size;  // anchored above frame
-  const lx   = CARD.infoLeft;
-  const mx   = lx + size + gap;
+  // Last info row (ID N°) baseline: CARD.dividerBottom + 108 + 46*2 = 615
+  const lastRowY = CARD.dividerBottom + 108 + 46 * 2;
+  const y  = lastRowY - size;               // bottom of logo aligns with text baseline
+  const rx = CARD.infoRight - size;         // fingerprint flush right
+  const lx = rx - gap - size;               // L mark left of fingerprint
 
   return `
-  <!-- Lubies "L" mark (placeholder — replace once artist provides SVG source) -->
+  <!-- Lubies "L" mark — bottom right, aligned with last text row -->
   ${lubiesLLogo(lx, y, size, p.accent, `l-${id}`)}
   <!-- Lubies fingerprint mark — artist original from "Lubies fingerprints.svg" -->
-  ${fingerprintLogo(mx, y, size, '#eb5b44', `fp-${id}`)}`;
+  ${fingerprintLogo(rx, y, size, '#eb5b44', `fp-${id}`)}`;
 }
 
 // ---------------------------------------------------------------------------
