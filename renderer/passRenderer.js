@@ -128,7 +128,6 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   const p   = palette;
   const cp  = `banner-clip-${id}`;   // banner clip region
   const gid = `banner-fade-${id}`;   // bottom-fade gradient
-  const fid = `pfp-filter-${id}`;    // silhouette filter
 
   // Banner clipPath: inner rounded top corners, straight bottom edge
   const bcp = [
@@ -144,48 +143,23 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   const { width: iw, height: ih } = pfpData || {};
   const fit = pfpData ? _fitPFPInBanner(iw, ih) : null;
 
-  // subject = background-removed PNG (transparent) — enables clean outline + mask.
-  // Falls back to duotone when remove.bg API key is not set.
-  const subject = pfpData && pfpData.subject ? pfpData.subject : null;
-  const sid     = `subj-filter-${id}`;
-  const mid     = `subj-mask-${id}`;
-
-  const subjectDefs = subject ? `
-    ${_subjectFilterDef(sid, p)}
-    <!-- Mask: white = show pattern, black = hide inside subject -->
-    <mask id="${mid}">
-      <rect x="${CARD.ix}" y="${CARD.iy}" width="${CARD.iw}"
-            height="${CARD.bannerH - CARD.iy}" fill="white"/>
-      ${_subjectImageEl(subject, fit, `silh-alpha-${id}`)}
-    </mask>
-    <!-- Collapse subject alpha → solid black for mask use -->
-    <filter id="silh-alpha-${id}" color-interpolation-filters="sRGB">
-      <feColorMatrix type="matrix"
-        values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 50 -1"/>
-    </filter>` : '';
-
-  // duotone filter used for both paths (base layer when subject present, sole layer when not)
-  const pfpFilterDef = pfpData ? _duotoneFilterDef(fid, p) : '';
+  // Outline filter — works on ANY opaque image: finds bright subject pixels
+  // via luminanceToAlpha, dilates to create a halo, subtracts original bright
+  // area → just the border ring, colors it with the palette accent.
+  const oid = `outline-${id}`;
+  const outlineDef = pfpData ? _luminanceOutlineFilterDef(oid, p) : '';
 
   const pfpLayer = pfpData
-    ? subject
-      // ── Path A: background removed → dark silhouette + accent outline + masked pattern
-      ? `<!-- PFP duotone base (full image, muted) -->
+    // ── Full-color PFP base + luminance-derived accent outline on top
+    ? `<!-- PFP full-color base -->
   <g clip-path="url(#${cp})">
-    ${_embeddedPFP(pfpData, fid)}
+    ${_embeddedPFPRaw(pfpData)}
   </g>
-  <!-- Subject silhouette + accent outline -->
+  <!-- Accent outline ring extracted from subject luminance -->
   <g clip-path="url(#${cp})">
-    <image href="${subject.dataURI}"
-           x="${fit ? fit.x : 0}" y="${fit ? fit.y : 0}"
-           width="${fit ? fit.w : CARD.iw}" height="${fit ? fit.h : CARD.bannerH}"
-           preserveAspectRatio="xMidYMid meet"
-           filter="url(#${sid})"/>
+    ${_embeddedPFPOutline(pfpData, fit, oid)}
   </g>`
-      // ── Path B: no background removal → duotone only
-      : `<g clip-path="url(#${cp})">
-    ${_embeddedPFP(pfpData, fid)}
-  </g>`
+    // ── Placeholder silhouette when no PFP supplied
     : `<!-- Placeholder silhouette -->
   <g clip-path="url(#${cp})">
     ${_silhouette(p)}
@@ -197,10 +171,9 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
     <clipPath id="${cp}"><path d="${bcp}"/></clipPath>
     <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${p.infoBg}" stop-opacity="0"/>
-      <stop offset="100%" stop-color="${p.infoBg}" stop-opacity="0.88"/>
+      <stop offset="100%" stop-color="${p.infoBg}" stop-opacity="0.92"/>
     </linearGradient>
-    ${pfpFilterDef}
-    ${subjectDefs}
+    ${outlineDef}
   </defs>
 
   <!-- ── CARD SHELL ── -->
@@ -216,8 +189,8 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   <!-- 2. PFP layer (duotone base, or duotone + subject silhouette) -->
   ${pfpLayer}
 
-  <!-- 3. Fingerprint pattern — masked to flow AROUND subject when outline available -->
-  <g clip-path="url(#${cp})" opacity="0.72" ${subject ? `mask="url(#${mid})"` : ''}>
+  <!-- 3. Fingerprint pattern overlay -->
+  <g clip-path="url(#${cp})" opacity="0.72">
     ${rdPattern}
   </g>
 
@@ -280,6 +253,9 @@ function _silhouette(p) {
  * Embed PFP image raw — no filter, full color, cover-fit in banner.
  * The RD pattern is layered on top of this at reduced opacity.
  */
+/**
+ * Embed the full-color PFP image — always shows the complete subject.
+ */
 function _embeddedPFPRaw(pfpData) {
   const { x, y, w, h } = _fitPFPInBanner(pfpData.width, pfpData.height);
   return `<image href="${pfpData.dataURI}"
@@ -288,80 +264,39 @@ function _embeddedPFPRaw(pfpData) {
 }
 
 /**
- * Build an SVG <filter> that:
- *  1. Dilates the source alpha → glow/outline ring in silhouetteStroke color.
- *  2. Remaps all RGB channels to silhouetteFill while preserving alpha.
- *  3. Merges outline (bottom) + silhouette fill (top).
+ * Second copy of the PFP with the luminance outline filter applied.
+ * Renders only the accent-coloured border ring — nothing inside the subject.
+ */
+function _embeddedPFPOutline(pfpData, fit, filterId) {
+  const x = fit ? fit.x : CARD.ix;
+  const y = fit ? fit.y : CARD.iy;
+  const w = fit ? fit.w : CARD.iw;
+  const h = fit ? fit.h : CARD.bannerH - CARD.iy;
+  return `<image href="${pfpData.dataURI}"
+         x="${x}" y="${y}" width="${w}" height="${h}"
+         preserveAspectRatio="xMidYMid meet"
+         filter="url(#${filterId})"/>`;
+}
+
+/**
+ * Luminance-based outline filter — works on ANY opaque image.
  *
- * @param {string} filterId
- * @param {object} p  Palette
- * @returns {string}  SVG <filter>…</filter> element.
+ *   1. luminanceToAlpha  — bright pixels → high alpha (the "subject")
+ *   2. feMorphology dilate — expand subject outward to create a halo zone
+ *   3. feComposite arithmetic (halo − luma) — only the NEW border ring remains
+ *   4. feFlood + feComposite — colour the ring with the palette accent
+ *
+ * The result is an accent-coloured outline around the bright subject,
+ * placed on top of the full-color PFP base layer.
  */
-/**
- * Filter for the background-removed subject PNG.
- * Dilates the subject alpha → accent-coloured outline ring,
- * then crushes interior RGB to near-black silhouette fill.
- * Works perfectly because the subject has real transparency.
- */
-function _subjectFilterDef(filterId, p) {
-  const fill = _hexToRGB01(p.silhouetteFill);
+function _luminanceOutlineFilterDef(filterId, p) {
   return `
-    <filter id="${filterId}" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
-      <!-- Dilate alpha → outline ring -->
-      <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="dilated"/>
-      <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="0.95" result="outlineColor"/>
-      <feComposite in="outlineColor" in2="dilated" operator="in" result="outline"/>
-      <!-- Crush interior RGB to dark fill -->
-      <feColorMatrix in="SourceGraphic" type="matrix"
-        values="0 0 0 0 ${fill.r.toFixed(3)}
-                0 0 0 0 ${fill.g.toFixed(3)}
-                0 0 0 0 ${fill.b.toFixed(3)}
-                0 0 0 1 0"
-        result="silh"/>
-      <!-- Outline behind silhouette -->
-      <feMerge>
-        <feMergeNode in="outline"/>
-        <feMergeNode in="silh"/>
-      </feMerge>
-    </filter>`;
-}
-
-/** <image> element for the background-removed subject, fitted into the banner. */
-function _subjectImageEl(subject, fit, filterId) {
-  const x = fit ? fit.x : 0;
-  const y = fit ? fit.y : 0;
-  const w = fit ? fit.w : 534;
-  const h = fit ? fit.h : 412;
-  return `<image href="${subject.dataURI}" x="${x}" y="${y}" width="${w}" height="${h}"
-           preserveAspectRatio="xMidYMid meet"
-           filter="url(#${filterId})"/>`;
-}
-
-/**
- * Duotone filter — maps the photo to two palette colours.
- * Darks → silhouetteFill (near-black), lights → accent.
- * The subject stays unmistakably recognisable; the image integrates
- * into the card colour palette like a designed event poster.
- */
-function _duotoneFilterDef(filterId, p) {
-  const dark = _hexToRGB01(p.silhouetteFill);
-  const lite = _hexToRGB01(p.accent);
-
-  // tableValues maps [0 → dark, 1 → lite] for each channel
-  const rVals = `${dark.r.toFixed(3)} ${lite.r.toFixed(3)}`;
-  const gVals = `${dark.g.toFixed(3)} ${lite.g.toFixed(3)}`;
-  const bVals = `${dark.b.toFixed(3)} ${lite.b.toFixed(3)}`;
-
-  return `
-    <filter id="${filterId}" color-interpolation-filters="sRGB">
-      <!-- 1. Desaturate to luminance grayscale -->
-      <feColorMatrix type="saturate" values="0" result="gray"/>
-      <!-- 2. Remap grayscale → duotone (dark=silhouetteFill, light=accent) -->
-      <feComponentTransfer in="gray">
-        <feFuncR type="table" tableValues="${rVals}"/>
-        <feFuncG type="table" tableValues="${gVals}"/>
-        <feFuncB type="table" tableValues="${bVals}"/>
-      </feComponentTransfer>
+    <filter id="${filterId}" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <feColorMatrix type="luminanceToAlpha" result="luma"/>
+      <feMorphology in="luma" operator="dilate" radius="9" result="halo"/>
+      <feComposite in="halo" in2="luma" operator="arithmetic" k2="1" k3="-1" k4="0" result="ring"/>
+      <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="1" result="accentFill"/>
+      <feComposite in="accentFill" in2="ring" operator="in"/>
     </filter>`;
 }
 
