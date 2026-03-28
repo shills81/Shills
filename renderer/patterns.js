@@ -2,103 +2,126 @@
 
 /**
  * patterns.js
- * Fingerprint whorl pattern — concentric oval ridges radiating from a center.
+ * Fingerprint whorl pattern — concentric oval ridges matching the Lubies
+ * fingerprint logo aesthetic.
  *
- * Generates streamlines that follow the iso-contours of:
- *   φ(x,y) = √((x−cx)² + (y−cy)²·ar²) + organic_perturbation(x,y)
+ * Generates closed oval paths that radiate outward from a whorl center,
+ * each with subtle organic perturbation so the ridges look hand-drawn and
+ * alive rather than mechanical.
  *
- * Iso-contours are concentric ovals with organic wobble, matching the
- * Lubies fingerprint logo aesthetic: tight ridges, flowing curves, single origin.
+ * Visual reference: the Lubies fingerprint logo (FP_PNG in logos.js)
+ *   — tight concentric rings, uniform stroke weight, ~10-13 px spacing
+ *   — slightly oval (not perfectly circular), whorl center near middle
+ *   — each ridge a single smooth closed loop
  */
 
 const TAU = Math.PI * 2;
 
+/**
+ * @param {function} rng      — seeded random, returns [0,1)
+ * @param {object}   bounds   — { x, y, w, h } banner rectangle
+ * @param {string}   strokeColor
+ * @returns {string}          SVG <g> element containing all ridge paths
+ */
 function generateRDPattern(rng, bounds, strokeColor) {
   const { x: bx, y: by, w: bw, h: bh } = bounds;
 
-  // ── Whorl center: randomised in the inner band of the banner ──
-  const cx = bx + bw * (0.38 + rng() * 0.24);   // 38–62% across
-  const cy = by + bh * (0.28 + rng() * 0.38);   // 28–66% down
+  // ── Whorl center ─────────────────────────────────────────────────────────────
+  // Placed slightly off-center, matching the fingerprint logo's natural feel
+  const cx = bx + bw * (0.42 + rng() * 0.16);   // 42–58% across
+  const cy = by + bh * (0.38 + rng() * 0.24);   // 38–62% down
 
-  // Oval aspect ratio (< 1 = horizontally stretched, > 1 = vertically stretched)
-  const ar = 0.70 + rng() * 0.50;
+  // Oval aspect ratio: < 1 = horizontally wider, > 1 = vertically taller
+  const ar = 0.72 + rng() * 0.36;   // 0.72–1.08
 
-  // Organic perturbation — gives the fingerprint its natural, non-mechanical look
-  const f1  = 0.020 + rng() * 0.016;
-  const f2  = 0.014 + rng() * 0.012;
-  const f3  = 0.032 + rng() * 0.014;
-  const ph  = Array.from({ length: 6 }, () => rng() * TAU);
-  const amp = 16 + rng() * 24;   // pixel amplitude of ridge wobble
+  // ── Organic perturbation ─────────────────────────────────────────────────────
+  // Low-frequency angular distortion (varies per ridge angle, not per pixel)
+  // This gives the "natural hand-drawn fingerprint" wobble
+  const nHarmonics = 6;
+  const harmAmp  = Array.from({ length: nHarmonics }, (_, i) =>
+    (7 + rng() * 9) / (i + 1)      // amplitude falls off with harmonic #
+  );
+  const harmPh   = Array.from({ length: nHarmonics }, () => rng() * TAU);
 
-  // ── Scalar potential: radial distance + multi-frequency distortion ──
-  function potential(px, py) {
-    const dx = px - cx;
-    const dy = (py - cy) * ar;
-    const r  = Math.sqrt(dx * dx + dy * dy);
-    return r
-      + amp        * Math.sin(px * f1  + py * f2  + ph[0])
-      + amp * 0.55 * Math.sin(-px * f2 + py * f1  + ph[1])
-      + amp * 0.35 * Math.cos(px * f3  - py * f2  + ph[2])
-      + amp * 0.22 * Math.sin(px * f2  + py * f3  + ph[3]);
-  }
+  // Slow spatial drift — very subtle positional offset so adjacent rings
+  // don't sit exactly parallel (adds the slight irregularity of a real print)
+  const driftAmp = 2.5 + rng() * 2.5;
+  const driftFx  = 0.012 + rng() * 0.008;
+  const driftFy  = 0.009 + rng() * 0.007;
+  const driftPh  = rng() * TAU;
 
-  // ── Flow = gradient of φ rotated 90° → traces iso-contour lines ──
-  const fd = 1.0;
-  function flowAngle(px, py) {
-    const dpx = (potential(px + fd, py) - potential(px - fd, py)) / (2 * fd);
-    const dpy = (potential(px, py + fd) - potential(px, py - fd)) / (2 * fd);
-    return Math.atan2(dpx, -dpy);
-  }
+  // ── Ring parameters ───────────────────────────────────────────────────────────
+  // Match the fingerprint logo's visual density:
+  //   Logo 144 px → ~5 rings in 144 px → spacing ≈ 22-26 px
+  //   Scaled to banner: keep spacing in the same pixel-density range
+  const spacing = 11 + rng() * 3;           // 11–14 px  (tight like the logo)
+  const sw      = (1.6 + rng() * 0.7).toFixed(2);  // 1.6–2.3 px stroke weight
 
-  // ── Stroke style: thin, tightly spaced ──
-  const spacing  = 9 + rng() * 5;                        // 9–14 px between ridges
-  const sw       = (1.4 + rng() * 0.9).toFixed(1);       // 1.4–2.3 px stroke
-  const stepLen  = 2.5;
-  const maxSteps = Math.ceil((bw + bh) * 2.0 / stepLen);
+  // Points per ring — enough for a smooth closed curve at banner scale
+  const STEPS = 240;
 
-  // ── Seeds: edges + interior grid ──
-  const seeds = [];
-  for (let sy = by; sy <= by + bh; sy += spacing) {
-    seeds.push([bx, sy]);
-    seeds.push([bx + bw, sy]);
-  }
-  for (let sx = bx; sx <= bx + bw; sx += spacing) {
-    seeds.push([sx, by]);
-    seeds.push([sx, by + bh]);
-  }
-  for (let sy = by + spacing; sy < by + bh; sy += spacing * 1.8) {
-    for (let sx = bx + spacing; sx < bx + bw; sx += spacing * 1.8) {
-      seeds.push([sx, sy]);
-    }
-  }
+  // Max radial distance needed to guarantee coverage beyond all banner corners
+  const cornerDist = Math.max(
+    Math.hypot(bx - cx, by - cy),
+    Math.hypot(bx + bw - cx, by - cy),
+    Math.hypot(bx - cx, by + bh - cy),
+    Math.hypot(bx + bw - cx, by + bh - cy),
+  );
+  const maxR = cornerDist + spacing;
 
-  // ── Trace paths ──
+  // ── Build ring paths ──────────────────────────────────────────────────────────
   const pathData = [];
-  for (const [sx, sy] of seeds) {
-    const pts = [[sx, sy]];
-    let px = sx, py = sy;
 
-    for (let s = 0; s < maxSteps; s++) {
-      const a = flowAngle(px, py);
-      px += Math.cos(a) * stepLen;
-      py += Math.sin(a) * stepLen;
-      if (px < bx - 10 || px > bx + bw + 10 || py < by - 10 || py > by + bh + 10) break;
+  for (let r = spacing * 0.4; r <= maxR; r += spacing) {
+    const pts = [];
+
+    for (let i = 0; i <= STEPS; i++) {
+      const theta = (i / STEPS) * TAU;
+      const cosT  = Math.cos(theta);
+      const sinT  = Math.sin(theta);
+
+      // Base oval point
+      let px = cx + r * cosT;
+      let py = cy + (r / ar) * sinT;
+
+      // Angular perturbation: sum of harmonics (distorts the ring shape)
+      let angPerturb = 0;
+      for (let h = 0; h < nHarmonics; h++) {
+        angPerturb += harmAmp[h] * Math.sin((h + 1) * theta + harmPh[h]);
+      }
+
+      // Spatial drift (position-based, very low frequency)
+      const drift = driftAmp * Math.sin(px * driftFx + py * driftFy + driftPh);
+
+      // Apply perturbation radially (pushes ridge in/out from center)
+      const pertR    = angPerturb + drift;
+      const radialAng = Math.atan2(py - cy, px - cx);
+      px += pertR * Math.cos(radialAng);
+      py += pertR * Math.sin(radialAng);
+
       pts.push([px, py]);
     }
 
-    if (pts.length < 4) continue;
+    // Skip rings that are entirely outside the banner (with padding)
+    const pad = 30;
+    const anyVisible = pts.some(
+      ([px, py]) => px >= bx - pad && px <= bx + bw + pad &&
+                    py >= by - pad && py <= by + bh + pad
+    );
+    if (!anyVisible) continue;
 
-    // Smooth via quadratic bezier through midpoints
-    let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
-    for (let i = 0; i < pts.length - 2; i++) {
-      const cpx = pts[i + 1][0].toFixed(1);
-      const cpy = pts[i + 1][1].toFixed(1);
-      const ex  = ((pts[i + 1][0] + pts[i + 2][0]) / 2).toFixed(1);
-      const ey  = ((pts[i + 1][1] + pts[i + 2][1]) / 2).toFixed(1);
+    // Smooth closed path using quadratic bézier through midpoints
+    // (same technique as the original, gives the logo's flowing curves)
+    let d = `M ${((pts[0][0] + pts[STEPS][0]) / 2).toFixed(1)} ${((pts[0][1] + pts[STEPS][1]) / 2).toFixed(1)}`;
+    for (let i = 0; i < STEPS; i++) {
+      const cpx = pts[i][0].toFixed(1);
+      const cpy = pts[i][1].toFixed(1);
+      const ex  = ((pts[i][0] + pts[i + 1][0]) / 2).toFixed(1);
+      const ey  = ((pts[i][1] + pts[i + 1][1]) / 2).toFixed(1);
       d += ` Q ${cpx} ${cpy} ${ex} ${ey}`;
     }
-    const last = pts[pts.length - 1];
-    d += ` L ${last[0].toFixed(1)} ${last[1].toFixed(1)}`;
+    d += ' Z';
+
     pathData.push(d);
   }
 
