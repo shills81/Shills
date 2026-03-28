@@ -102,32 +102,37 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   const cp   = `banner-clip-${id}`;
   const gid  = `banner-fade-${id}`;   // gradient id for bottom fade
 
-  // When PFP is present: image first, RD pattern on top at low opacity
-  // When no PFP: solid banner bg, RD pattern at full opacity, placeholder silhouette
-  const bannerLayers = pfpData
+  // Layer order (matches reference passes):
+  //   1. Dark banner background
+  //   2. RD fingerprint pattern (full opacity, thin ridges)
+  //   3. PFP — positioned lower half of banner, dark silhouette style
+  //   4. Bottom fade into info panel
+  const pfpLayer = pfpData
     ? `
-  <!-- PFP image — fills banner -->
+  <!-- PFP — bottom-anchored in banner, dark tint overlay -->
   <g clip-path="url(#${cp})">
     ${_embeddedPFPRaw(pfpData)}
-  </g>
-  <!-- RD fingerprint overlay — semi-transparent on top of PFP -->
-  <g clip-path="url(#${cp})" opacity="0.45">
-    ${rdPattern}
-  </g>
-  <!-- Bottom fade — blends banner into info panel -->
-  <rect x="0" y="${CARD.bannerH - 120}" width="${CARD.width}" height="120"
-        fill="url(#${gid})" clip-path="url(#${cp})"/>`
+    <!-- Dark tint over PFP so fingerprint ridges show through -->
+    <rect x="0" y="0" width="${CARD.width}" height="${CARD.bannerH}"
+          fill="${p.bannerBg}" opacity="0.55"/>
+  </g>`
     : `
-  <!-- Banner background -->
-  <rect x="0" y="0" width="${CARD.width}" height="${CARD.bannerH}" fill="${p.bannerBg}" clip-path="url(#${cp})"/>
-  <!-- RD fingerprint pattern — full opacity, no PFP -->
-  <g clip-path="url(#${cp})">
-    ${rdPattern}
-  </g>
   <!-- Placeholder silhouette -->
   <g clip-path="url(#${cp})">
     ${_silhouette(p)}
   </g>`;
+
+  const bannerLayers = `
+  <!-- 1. Banner background -->
+  <rect x="0" y="0" width="${CARD.width}" height="${CARD.bannerH}" fill="${p.bannerBg}" clip-path="url(#${cp})"/>
+  ${pfpLayer}
+  <!-- 2. RD fingerprint pattern — always on top -->
+  <g clip-path="url(#${cp})" opacity="${pfpData ? '0.7' : '1.0'}">
+    ${rdPattern}
+  </g>
+  <!-- 3. Bottom fade into info panel -->
+  <rect x="0" y="${CARD.bannerH - 100}" width="${CARD.width}" height="100"
+        fill="url(#${gid})" clip-path="url(#${cp})"/>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CARD.width} ${CARD.height}" width="${CARD.width}" height="${CARD.height}" role="img" aria-label="Lubies Factory Pass #${paddedId}">
 
