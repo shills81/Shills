@@ -55,8 +55,7 @@ const FILTER_TOKEN = getFlag('--token') ? Number(getFlag('--token')) : null;
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
 const QA_DIR      = __dirname;
-const PFPS_DIR    = path.join(QA_DIR, 'pfps');          // override/extra PFPs
-const IMAGES_DIR  = path.join(QA_DIR, '..', 'images');  // repo artwork images
+const PFPS_DIR    = path.join(QA_DIR, 'pfps');   // curated PFP test images
 const RESULTS_DIR = path.join(QA_DIR, 'results');
 const PASSES_DIR  = path.join(RESULTS_DIR, 'passes');
 
@@ -72,46 +71,22 @@ const head = msg    => log(`\n\x1b[1m${msg}\x1b[0m`);
 
 // ─── Load real PFPs from a directory ─────────────────────────────────────────
 
-async function _loadPFPsFromDir(dir, { recursive = false } = {}) {
-  if (!fs.existsSync(dir)) return [];
+async function loadRealPFPs() {
+  if (!fs.existsSync(PFPS_DIR)) return [];
   const EXTS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp']);
-
-  // Collect file paths
-  const filePaths = [];
-  function scan(d) {
-    for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
-      const full = path.join(d, entry.name);
-      if (entry.isDirectory() && recursive) { scan(full); continue; }
-      if (entry.isFile() && EXTS.has(path.extname(entry.name).toLowerCase())) {
-        filePaths.push(full);
-      }
-    }
-  }
-  scan(dir);
-  filePaths.sort();
+  const files = fs.readdirSync(PFPS_DIR)
+    .filter(f => EXTS.has(path.extname(f).toLowerCase()))
+    .sort();
 
   const loaded = [];
-  for (const fp of filePaths) {
+  for (const file of files) {
     try {
-      const pfp = await loadPFP(fp);
-      loaded.push(pfp);
+      loaded.push(await loadPFP(path.join(PFPS_DIR, file)));
     } catch {
-      try { loaded.push(loadPFPSync(fp)); } catch { /* skip unreadable */ }
+      try { loaded.push(loadPFPSync(path.join(PFPS_DIR, file))); } catch { /* skip */ }
     }
   }
   return loaded;
-}
-
-async function loadRealPFPs() {
-  // qa/pfps/ — explicit overrides / extras (top-level only)
-  const pfpDir = await _loadPFPsFromDir(PFPS_DIR);
-  // images/ — repo artwork (top-level + collabs sub-folder)
-  const imgDir = await _loadPFPsFromDir(IMAGES_DIR, { recursive: true });
-
-  // Deduplicate by name
-  const seen = new Set(pfpDir.map(p => p.name));
-  const unique = [...pfpDir, ...imgDir.filter(p => !seen.has(p.name))];
-  return unique;
 }
 
 // ─── Suite 1: Renderer ────────────────────────────────────────────────────────
@@ -316,7 +291,7 @@ async function main() {
   // Load real PFPs from qa/pfps/
   const realPFPs = await loadRealPFPs();
   info(`Synthetic PFPs: ${SYNTHETIC_PFPS.length}`);
-  info(`Real PFPs (images/ + qa/pfps/): ${realPFPs.length}`);
+  info(`Real PFPs in qa/pfps/: ${realPFPs.length}`);
   if (FILTER_PFP)   info(`Filter: --filter ${FILTER_PFP}`);
   if (FILTER_TOKEN) info(`Filter: --token ${FILTER_TOKEN}`);
 
