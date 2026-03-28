@@ -6,6 +6,8 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
+    "qa": "node qa/run.js",
+    "qa:fast": "node qa/run.js --no-contract",
     "node": "hardhat node",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
     "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
