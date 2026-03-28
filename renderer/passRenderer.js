@@ -68,9 +68,12 @@ const CARD = {
  * @param {object}        passData   Onchain PassData fields.
  * @param {object}        [config]
  * @param {string}        [config.salt]
+ * @param {object|null}   [pfpData]  Optional PFP from loadPFP(). When provided,
+ *                                   the image is embedded in the banner with a
+ *                                   palette-matched silhouette filter.
  * @returns {string}  Complete SVG document string.
  */
-function generateTokenImage(tokenId, passData, config = {}) {
+function generateTokenImage(tokenId, passData, config = {}, pfpData = null) {
   const id     = Number(tokenId);
   const traits = generateTokenTraits(tokenId, passData, config);
 
@@ -87,16 +90,21 @@ function generateTokenImage(tokenId, passData, config = {}) {
   const paddedId    = String(id).padStart(4, '0');
   const statusColor = _statusColor(traits._status, palette);
 
-  return _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor });
+  return _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData });
 }
 
 // ---------------------------------------------------------------------------
 // SVG composition
 // ---------------------------------------------------------------------------
 
-function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor }) {
-  const p  = palette;
-  const cp = `banner-clip-${id}`;   // clipPath id — unique per token
+function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData }) {
+  const p    = palette;
+  const cp   = `banner-clip-${id}`;    // clipPath id — unique per token
+  const fid  = `pfp-filter-${id}`;     // filter id for PFP silhouette
+
+  // Silhouette filter def + image element (only when pfpData is provided)
+  const pfpDefs    = pfpData ? _silhouetteFilterDef(fid, p)   : '';
+  const pfpElement = pfpData ? _embeddedPFP(pfpData, fid)     : _silhouette(p);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CARD.width} ${CARD.height}" width="${CARD.width}" height="${CARD.height}" role="img" aria-label="Lubies Factory Pass #${paddedId}">
 
@@ -105,6 +113,7 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor }) 
     <clipPath id="${cp}">
       <path d="M ${CARD.rx},0 L ${CARD.width - CARD.rx},0 Q ${CARD.width},0 ${CARD.width},${CARD.rx} L ${CARD.width},${CARD.bannerH} L 0,${CARD.bannerH} L 0,${CARD.rx} Q 0,0 ${CARD.rx},0 Z"/>
     </clipPath>
+    ${pfpDefs}
   </defs>
 
   <!-- 1. Card base fill (info panel color behind everything) -->
@@ -121,7 +130,7 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor }) 
 
   <!-- 5. PFP silhouette -->
   <g clip-path="url(#${cp})">
-    ${_silhouette(p)}
+    ${pfpElement}
   </g>
 
   <!-- ── DIVIDER ── -->
@@ -179,6 +188,110 @@ function _silhouette(p) {
   <!-- Body / shoulders -->
   <path d="M ${cx - 110},${398} L ${cx - 112},${296} C ${cx - 110},${268} ${cx - 90},${254} ${cx - 66},${248} L ${cx - 22},${266} L ${cx + 22},${266} L ${cx + 66},${248} C ${cx + 90},${254} ${cx + 110},${268} ${cx + 112},${296} L ${cx + 110},${398} Z"
         fill="${p.silhouetteFill}" stroke="${p.silhouetteStroke}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+}
+
+// ---------------------------------------------------------------------------
+// PFP silhouette filter + embed (used when pfpData is provided)
+// ---------------------------------------------------------------------------
+
+/**
+ * Build an SVG <filter> that:
+ *  1. Dilates the source alpha → glow/outline ring in silhouetteStroke color.
+ *  2. Remaps all RGB channels to silhouetteFill while preserving alpha.
+ *  3. Merges outline (bottom) + silhouette fill (top).
+ *
+ * @param {string} filterId
+ * @param {object} p  Palette
+ * @returns {string}  SVG <filter>…</filter> element.
+ */
+function _silhouetteFilterDef(filterId, p) {
+  // Parse silhouetteFill into r/g/b [0–1] for feColorMatrix
+  const rgb = _hexToRGB01(p.silhouetteFill);
+
+  return `
+    <!-- PFP silhouette filter: outline + palette-fill -->
+    <filter id="${filterId}" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <!-- 1. Dilate alpha to create outline shape -->
+      <feMorphology in="SourceAlpha" operator="dilate" radius="4" result="dilated"/>
+      <!-- 2. Flood outline color -->
+      <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="0.95" result="outlineFlood"/>
+      <!-- 3. Clip flood to dilated outline -->
+      <feComposite in="outlineFlood" in2="dilated" operator="in" result="outline"/>
+      <!-- 4. Remap source graphic RGB → silhouetteFill, keep alpha -->
+      <feColorMatrix in="SourceGraphic" type="matrix"
+        values="0 0 0 0 ${rgb.r.toFixed(4)}
+                0 0 0 0 ${rgb.g.toFixed(4)}
+                0 0 0 0 ${rgb.b.toFixed(4)}
+                0 0 0 1 0"
+        result="filled"/>
+      <!-- 5. Layer: outline under filled silhouette -->
+      <feMerge>
+        <feMergeNode in="outline"/>
+        <feMergeNode in="filled"/>
+      </feMerge>
+    </filter>`;
+}
+
+/**
+ * Fit the PFP image in the banner, centered, filling height.
+ * Returns { x, y, w, h } for the <image> element.
+ *
+ * @param {number} imgW  Natural image width.
+ * @param {number} imgH  Natural image height.
+ * @returns {{ x: number, y: number, w: number, h: number }}
+ */
+function _fitPFPInBanner(imgW, imgH) {
+  const targetH = CARD.bannerH;
+  const targetW = CARD.width;
+
+  const scaleH = targetH / imgH;
+  const scaleW = targetW / imgW;
+  const scale  = Math.max(scaleH, scaleW);  // cover, not contain
+
+  const w = imgW * scale;
+  const h = imgH * scale;
+  const x = (targetW - w) / 2;
+  const y = (targetH - h) / 2;
+
+  return { x: +x.toFixed(2), y: +y.toFixed(2), w: +w.toFixed(2), h: +h.toFixed(2) };
+}
+
+/**
+ * Build the SVG <image> element with the silhouette filter applied.
+ *
+ * @param {object} pfpData   From loadPFP() / loadPFPSync().
+ * @param {string} filterId
+ * @returns {string}
+ */
+function _embeddedPFP(pfpData, filterId) {
+  const { x, y, w, h } = _fitPFPInBanner(pfpData.width, pfpData.height);
+  return `
+  <image href="${pfpData.dataURI}"
+         x="${x}" y="${y}" width="${w}" height="${h}"
+         preserveAspectRatio="xMidYMid slice"
+         filter="url(#${filterId})"/>`;
+}
+
+/**
+ * Parse a hex color (#rrggbb or #rgb) into { r, g, b } in [0, 1].
+ * Falls back to mid-grey on any parse failure.
+ *
+ * @param {string} hex
+ * @returns {{ r: number, g: number, b: number }}
+ */
+function _hexToRGB01(hex) {
+  if (!hex || !hex.startsWith('#')) return { r: 0.3, g: 0.3, b: 0.3 };
+  let h = hex.slice(1);
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if (h.length !== 6) return { r: 0.3, g: 0.3, b: 0.3 };
+  // hsl() colors (dynamic palette) can't be parsed as hex — return near-black
+  if (hex.startsWith('hsl')) return { r: 0.04, g: 0.04, b: 0.04 };
+  const n = parseInt(h, 16);
+  return {
+    r: ((n >> 16) & 0xff) / 255,
+    g: ((n >> 8)  & 0xff) / 255,
+    b: (n          & 0xff) / 255,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -371,10 +484,11 @@ function _statusColor(status, palette) {
  * @param {number|bigint} tokenId
  * @param {object}        passData
  * @param {object}        [config]
+ * @param {object|null}   [pfpData]
  * @returns {string}  data:image/svg+xml;base64,...
  */
-function generateTokenImageDataURI(tokenId, passData, config = {}) {
-  const svg = generateTokenImage(tokenId, passData, config);
+function generateTokenImageDataURI(tokenId, passData, config = {}, pfpData = null) {
+  const svg = generateTokenImage(tokenId, passData, config, pfpData);
   const b64 = Buffer.from(svg, 'utf8').toString('base64');
   return `data:image/svg+xml;base64,${b64}`;
 }
