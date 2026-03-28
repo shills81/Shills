@@ -99,12 +99,35 @@ function generateTokenImage(tokenId, passData, config = {}, pfpData = null) {
 
 function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pfpData }) {
   const p    = palette;
-  const cp   = `banner-clip-${id}`;    // clipPath id — unique per token
-  const fid  = `pfp-filter-${id}`;     // filter id for PFP silhouette
+  const cp   = `banner-clip-${id}`;
+  const gid  = `banner-fade-${id}`;   // gradient id for bottom fade
 
-  // Silhouette filter def + image element (only when pfpData is provided)
-  const pfpDefs    = pfpData ? _silhouetteFilterDef(fid, p)   : '';
-  const pfpElement = pfpData ? _embeddedPFP(pfpData, fid)     : _silhouette(p);
+  // When PFP is present: image first, RD pattern on top at low opacity
+  // When no PFP: solid banner bg, RD pattern at full opacity, placeholder silhouette
+  const bannerLayers = pfpData
+    ? `
+  <!-- PFP image — fills banner -->
+  <g clip-path="url(#${cp})">
+    ${_embeddedPFPRaw(pfpData)}
+  </g>
+  <!-- RD fingerprint overlay — semi-transparent on top of PFP -->
+  <g clip-path="url(#${cp})" opacity="0.45">
+    ${rdPattern}
+  </g>
+  <!-- Bottom fade — blends banner into info panel -->
+  <rect x="0" y="${CARD.bannerH - 120}" width="${CARD.width}" height="120"
+        fill="url(#${gid})" clip-path="url(#${cp})"/>`
+    : `
+  <!-- Banner background -->
+  <rect x="0" y="0" width="${CARD.width}" height="${CARD.bannerH}" fill="${p.bannerBg}" clip-path="url(#${cp})"/>
+  <!-- RD fingerprint pattern — full opacity, no PFP -->
+  <g clip-path="url(#${cp})">
+    ${rdPattern}
+  </g>
+  <!-- Placeholder silhouette -->
+  <g clip-path="url(#${cp})">
+    ${_silhouette(p)}
+  </g>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CARD.width} ${CARD.height}" width="${CARD.width}" height="${CARD.height}" role="img" aria-label="Lubies Factory Pass #${paddedId}">
 
@@ -113,25 +136,18 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
     <clipPath id="${cp}">
       <path d="M ${CARD.rx},0 L ${CARD.width - CARD.rx},0 Q ${CARD.width},0 ${CARD.width},${CARD.rx} L ${CARD.width},${CARD.bannerH} L 0,${CARD.bannerH} L 0,${CARD.rx} Q 0,0 ${CARD.rx},0 Z"/>
     </clipPath>
-    ${pfpDefs}
+    <!-- Bottom-of-banner fade gradient -->
+    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${p.infoBg}" stop-opacity="0"/>
+      <stop offset="100%" stop-color="${p.infoBg}" stop-opacity="0.92"/>
+    </linearGradient>
   </defs>
 
-  <!-- 1. Card base fill (info panel color behind everything) -->
+  <!-- 1. Card base fill -->
   <rect width="${CARD.width}" height="${CARD.height}" rx="${CARD.rx}" fill="${p.infoBg}"/>
 
   <!-- ── BANNER ── -->
-  <!-- 3. Banner background -->
-  <rect x="0" y="0" width="${CARD.width}" height="${CARD.bannerH}" fill="${p.bannerBg}" clip-path="url(#${cp})"/>
-
-  <!-- 4. RD fingerprint pattern -->
-  <g clip-path="url(#${cp})">
-    ${rdPattern}
-  </g>
-
-  <!-- 5. PFP silhouette -->
-  <g clip-path="url(#${cp})">
-    ${pfpElement}
-  </g>
+  ${bannerLayers}
 
   <!-- ── DIVIDER ── -->
   <!-- 6. Accent stripe -->
@@ -193,6 +209,17 @@ function _silhouette(p) {
 // ---------------------------------------------------------------------------
 // PFP silhouette filter + embed (used when pfpData is provided)
 // ---------------------------------------------------------------------------
+
+/**
+ * Embed PFP image raw — no filter, full color, cover-fit in banner.
+ * The RD pattern is layered on top of this at reduced opacity.
+ */
+function _embeddedPFPRaw(pfpData) {
+  const { x, y, w, h } = _fitPFPInBanner(pfpData.width, pfpData.height);
+  return `<image href="${pfpData.dataURI}"
+         x="${x}" y="${y}" width="${w}" height="${h}"
+         preserveAspectRatio="xMidYMid slice"/>`;
+}
 
 /**
  * Build an SVG <filter> that:
@@ -299,49 +326,48 @@ function _hexToRGB01(hex) {
 // ---------------------------------------------------------------------------
 
 function _infoTitle(p) {
-  const y0 = CARD.dividerBottom + 52;  // "FACTORY" baseline
-  const y1 = y0 + 48;                  // "PASS" baseline
+  const y0 = CARD.dividerBottom + 46;  // "FACTORY" baseline
+  const y1 = y0 + 44;                  // "PASS" baseline
   return `
   <text x="${CARD.infoLeft}" y="${y0}"
         font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
-        font-size="40" font-weight="900" fill="${p.accent}"
-        letter-spacing="2" text-rendering="geometricPrecision">FACTORY</text>
+        font-size="36" font-weight="900" fill="${p.accent}"
+        letter-spacing="4" text-rendering="geometricPrecision">FACTORY</text>
   <text x="${CARD.infoLeft}" y="${y1}"
         font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
-        font-size="40" font-weight="900" fill="${p.accent}"
-        letter-spacing="2" text-rendering="geometricPrecision">PASS</text>`;
+        font-size="36" font-weight="900" fill="${p.text}"
+        letter-spacing="4" text-rendering="geometricPrecision">PASS</text>`;
 }
 
 function _infoRows(paddedId, traits, p, statusColor) {
   const rowY = [
-    CARD.dividerBottom + 154,   // STATUS
-    CARD.dividerBottom + 206,   // TOKEN
-    CARD.dividerBottom + 258,   // ID N°
+    CARD.dividerBottom + 148,   // STATUS
+    CARD.dividerBottom + 196,   // TOKEN
+    CARD.dividerBottom + 244,   // ID N°
   ];
-  const labelFont = `font-family="'Courier New', Courier, monospace" font-size="13" font-weight="700" fill="${p.textMuted}" letter-spacing="2"`;
-  const valueFont = `font-family="'Courier New', Courier, monospace" font-size="15" font-weight="400" fill="${p.text}" letter-spacing="1"`;
+  const labelFont = `font-family="'Courier New', Courier, monospace" font-size="14" font-weight="700" fill="${p.textMuted}" letter-spacing="2"`;
+  const valueFont = `font-family="'Courier New', Courier, monospace" font-size="16" font-weight="400" fill="${p.text}" letter-spacing="1"`;
   const lineColor = p.accentDim;
 
-  // Divider lines above each row
   function divider(y) {
-    return `<line x1="${CARD.infoLeft}" y1="${y - 18}" x2="${CARD.infoRight}" y2="${y - 18}" stroke="${lineColor}" stroke-width="0.75"/>`;
+    return `<line x1="${CARD.infoLeft}" y1="${y - 16}" x2="${CARD.infoRight}" y2="${y - 16}" stroke="${lineColor}" stroke-width="1"/>`;
   }
 
-  const statusDot = `<circle cx="${CARD.infoLeft}" cy="${rowY[0] - 5}" r="5" fill="${statusColor}"/>`;
+  const statusDot = `<circle cx="${CARD.infoLeft + 6}" cy="${rowY[0] - 5}" r="6" fill="${statusColor}"/>`;
 
   return `
   ${divider(rowY[0])}
   ${statusDot}
-  <text x="${CARD.infoLeft + 14}" y="${rowY[0]}" ${labelFont}>STATUS :</text>
-  <text x="${CARD.infoLeft + 122}" y="${rowY[0]}" ${valueFont}>${traits.status.toUpperCase()}</text>
+  <text x="${CARD.infoLeft + 18}" y="${rowY[0]}" ${labelFont}>STATUS</text>
+  <text x="${CARD.infoLeft + 130}" y="${rowY[0]}" ${valueFont}>${traits.status.toUpperCase()}</text>
 
   ${divider(rowY[1])}
-  <text x="${CARD.infoLeft}" y="${rowY[1]}" ${labelFont}>TOKEN :</text>
-  <text x="${CARD.infoLeft + 106}" y="${rowY[1]}" ${valueFont}># ${paddedId}</text>
+  <text x="${CARD.infoLeft}" y="${rowY[1]}" ${labelFont}>TOKEN</text>
+  <text x="${CARD.infoLeft + 116}" y="${rowY[1]}" ${valueFont}>#${paddedId}</text>
 
   ${divider(rowY[2])}
-  <text x="${CARD.infoLeft}" y="${rowY[2]}" ${labelFont}>ID N° :</text>
-  <text x="${CARD.infoLeft + 106}" y="${rowY[2]}" ${valueFont}>${traits.edition}</text>`;
+  <text x="${CARD.infoLeft}" y="${rowY[2]}" ${labelFont}>TIER</text>
+  <text x="${CARD.infoLeft + 116}" y="${rowY[2]}" ${valueFont}>${traits.accessTier.toUpperCase()}</text>`;
 }
 
 // ---------------------------------------------------------------------------
