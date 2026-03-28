@@ -143,21 +143,16 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
   const { width: iw, height: ih } = pfpData || {};
   const fit = pfpData ? _fitPFPInBanner(iw, ih) : null;
 
-  // Outline filter — works on ANY opaque image: finds bright subject pixels
-  // via luminanceToAlpha, dilates to create a halo, subtracts original bright
-  // area → just the border ring, colors it with the palette accent.
-  const oid = `outline-${id}`;
-  const outlineDef = pfpData ? _luminanceOutlineFilterDef(oid, p) : '';
+  // Silhouette filter — works on ANY opaque image.
+  // Detects subject via luminance, fills it dark, adds accent outline ring.
+  const sid = `silh-${id}`;
+  const silhDef = pfpData ? _silhouetteFilterDef(sid, p) : '';
 
   const pfpLayer = pfpData
-    // ── Full-color PFP base + luminance-derived accent outline on top
-    ? `<!-- PFP full-color base -->
+    // ── Dark silhouette of subject shape + accent outline ring
+    ? `<!-- PFP silhouette: dark fill + accent outline, subject from luminance -->
   <g clip-path="url(#${cp})">
-    ${_embeddedPFPRaw(pfpData)}
-  </g>
-  <!-- Accent outline ring extracted from subject luminance -->
-  <g clip-path="url(#${cp})">
-    ${_embeddedPFPOutline(pfpData, fit, oid)}
+    ${_embeddedPFPSilhouette(pfpData, fit, sid)}
   </g>`
     // ── Placeholder silhouette when no PFP supplied
     : `<!-- Placeholder silhouette -->
@@ -173,7 +168,7 @@ function _composeSVG({ id, paddedId, traits, palette, rdPattern, statusColor, pf
       <stop offset="0%" stop-color="${p.infoBg}" stop-opacity="0"/>
       <stop offset="100%" stop-color="${p.infoBg}" stop-opacity="0.92"/>
     </linearGradient>
-    ${outlineDef}
+    ${silhDef}
   </defs>
 
   <!-- ── CARD SHELL ── -->
@@ -254,20 +249,9 @@ function _silhouette(p) {
  * The RD pattern is layered on top of this at reduced opacity.
  */
 /**
- * Embed the full-color PFP image — always shows the complete subject.
+ * PFP image element with the silhouette filter applied.
  */
-function _embeddedPFPRaw(pfpData) {
-  const { x, y, w, h } = _fitPFPInBanner(pfpData.width, pfpData.height);
-  return `<image href="${pfpData.dataURI}"
-         x="${x}" y="${y}" width="${w}" height="${h}"
-         preserveAspectRatio="xMidYMid meet"/>`;
-}
-
-/**
- * Second copy of the PFP with the luminance outline filter applied.
- * Renders only the accent-coloured border ring — nothing inside the subject.
- */
-function _embeddedPFPOutline(pfpData, fit, filterId) {
+function _embeddedPFPSilhouette(pfpData, fit, filterId) {
   const x = fit ? fit.x : CARD.ix;
   const y = fit ? fit.y : CARD.iy;
   const w = fit ? fit.w : CARD.iw;
@@ -279,24 +263,44 @@ function _embeddedPFPOutline(pfpData, fit, filterId) {
 }
 
 /**
- * Luminance-based outline filter — works on ANY opaque image.
+ * Silhouette + outline filter — works on ANY opaque image, no remove.bg needed.
  *
- *   1. luminanceToAlpha  — bright pixels → high alpha (the "subject")
- *   2. feMorphology dilate — expand subject outward to create a halo zone
- *   3. feComposite arithmetic (halo − luma) — only the NEW border ring remains
- *   4. feFlood + feComposite — colour the ring with the palette accent
+ * Steps:
+ *   1. luminanceToAlpha  — bright pixels → subject alpha mask
+ *   2. Dilate → accent-coloured outline ring just outside subject edge
+ *   3. feFlood silhouetteFill → flood the subject area dark
+ *   4. Merge: outline ring behind the dark silhouette fill
  *
- * The result is an accent-coloured outline around the bright subject,
- * placed on top of the full-color PFP base layer.
+ * Result: dark filled subject shape with a glowing accent outline,
+ * sitting over the fingerprint ring pattern background.
  */
-function _luminanceOutlineFilterDef(filterId, p) {
+function _silhouetteFilterDef(filterId, p) {
   return `
-    <filter id="${filterId}" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
-      <feColorMatrix type="luminanceToAlpha" result="luma"/>
-      <feMorphology in="luma" operator="dilate" radius="9" result="halo"/>
-      <feComposite in="halo" in2="luma" operator="arithmetic" k2="1" k3="-1" k4="0" result="ring"/>
+    <filter id="${filterId}" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+      <!-- 1. Blur before thresholding — smooths jagged edges on photos,
+              helps merge nearby bright regions (skin, hair) into one shape -->
+      <feGaussianBlur stdDeviation="5" result="blurred"/>
+      <!-- 2. Luminance → alpha: bright pixels become the subject mask -->
+      <feColorMatrix in="blurred" type="luminanceToAlpha" result="luma"/>
+      <!-- 3. Sharpen the threshold so mid-darks drop to zero and
+              mid-brights snap to fully opaque (slope=3, intercept=-0.55) -->
+      <feComponentTransfer in="luma" result="mask">
+        <feFuncA type="linear" slope="3" intercept="-0.55"/>
+      </feComponentTransfer>
+      <!-- 4. Dilate the mask → outline halo zone -->
+      <feMorphology in="mask" operator="dilate" radius="10" result="halo"/>
+      <!-- 5. Ring = halo minus original mask (just the border fringe) -->
+      <feComposite in="halo" in2="mask" operator="arithmetic" k2="1" k3="-1" k4="0" result="ring"/>
       <feFlood flood-color="${p.silhouetteStroke}" flood-opacity="1" result="accentFill"/>
-      <feComposite in="accentFill" in2="ring" operator="in"/>
+      <feComposite in="accentFill" in2="ring" operator="in" result="outline"/>
+      <!-- 6. Dark silhouette fill for the subject shape -->
+      <feFlood flood-color="${p.silhouetteFill}" flood-opacity="1" result="darkFill"/>
+      <feComposite in="darkFill" in2="mask" operator="in" result="silhouette"/>
+      <!-- 7. Compose: accent outline ring behind the dark silhouette -->
+      <feMerge>
+        <feMergeNode in="outline"/>
+        <feMergeNode in="silhouette"/>
+      </feMerge>
     </filter>`;
 }
 
